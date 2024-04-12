@@ -1,0 +1,498 @@
+:root {
+  --LineHeight: 1.6;
+  --font-family: -apple-system,"system-ui", -apple-system, "system-ui", sans-serif;
+  --font-family-mono: Menlo, source-code-pro, Monaco, 'Courier New', monospace;
+  --font-family-article: "Verdana Pro", -apple-system, "system-ui", sans-serif;
+}
+
+.def {
+  font-family: var(--font-family) !important;
+}
+
+.article {
+  font-family: var(--font-family-article) !important;
+}
+
+.mono {
+  font-family: var(--font-family-mono) !important;
+}
+
+* {
+  box-sizing:border-box;
+  -webkit-box-sizing:border-box;
+  -moz-box-sizing:border-box;
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: auto;
+  font-size: 18px;
+  line-height: var(--LineHeight);
+  justify-content: space-between;
+  font-family: var(--font-family) !important;
+  /*-webkit-font-smoothing: antialiased !important;*/
+  /*-moz-osx-font-smoothing: antialiased !important;*/
+}
+
+@media screen and (max-width: 1000px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  html {
+    font-size: 12px;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  outline: none;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  /*add scroll track to all screens*/
+  /*overflow-y: scroll;*/
+  caret-shape: auto;
+}
+
+body, p, a, b, i, h1, h2, h3, h4, h5, h6, blockquote {
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+}
+
+::selection {
+  color: #111111;
+  background: #c7a0df;
+}
+
+.red {
+  color: red;
+}
+
+.notSelectable {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+
+hr {
+  opacity: 0;
+  height: 1.1rem;
+  margin: 0;
+}
+
+/*img {*/
+/*  image-rendering: pixelated;*/
+/*  image-rendering: -moz-crisp-edges;*/
+/*  image-rendering: crisp-edges;*/
+/*}*/
+
+/******************************/
+/*--------- LINK ---------*/
+/******************************/
+
+a:link, a:visited, a:active {
+  color: #27388C;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/******************************/
+/*--------- SCROLLBAR -----------*/
+/******************************/
+
+.listScrollbar {
+  display: block;
+  overflow: auto;
+}
+
+.listScrollbar::-webkit-scrollbar {
+  width: 14px;
+}
+
+.listScrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.listScrollbar::-webkit-scrollbar-thumb {
+  background: #3d454988;
+  border-radius: 5px;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  background-clip: content-box;
+}
+
+.listScrollbar::-webkit-scrollbar-thumb:hover {
+  background: #3d4549;
+  border-radius: 5px;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  background-clip: content-box;
+}
+
+.light.listScrollbar::-webkit-scrollbar-thumb {
+  background: #aaAAaa50;
+  border-radius: 5px;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  background-clip: content-box;
+}
+
+.light.listScrollbar::-webkit-scrollbar-thumb:hover {
+  background: #aaAAaa;
+  border-radius: 5px;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  background-clip: content-box;
+}
+
+
+/******************************/
+/*--------- LAYOUT -----------*/
+/******************************/
+
+div.appLayout.S {
+  background-color: #eff901;
+  z-index: 100;
+}
+
+div.appLayout.M {
+  background-color: #00d3f9;
+  z-index: 100;
+}
+
+div.appLayout.L {
+  background-color: #b700f9;
+  z-index: 100;
+}
+
+/******************************/
+/*--------- INPUTS ---------*/
+/******************************/
+
+input {
+  border-radius: unset;
+  outline: unset;
+  background: unset;
+  border: unset;
+}
+
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #151a1c88;
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color: #151a1c88;
+}
+
+::-ms-input-placeholder { /* Microsoft Edge */
+  color: #151a1c88;
+}
+
+textarea {
+  font-family: var(--font-family);
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: var(--CodeLineHeight);
+  min-height: 50px;
+  max-height: 85vh;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  background: none;
+  border: none;
+  resize: none;
+  outline: none;
+  overflow: visible;
+  overscroll-behavior: none;
+}
+
+/******************************/
+/*--------- LOADING ---------*/
+/******************************/
+
+.spinner {
+  height: 40px;
+  width: 40px;
+  pointer-events: none;
+}
+
+.smallSpinner {
+  height: 20px;
+  width: 20px;
+  margin: 5px;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .spinner,
+  .smallSpinner {
+    animation: AppSpinnerAnimation infinite 1s linear;
+  }
+}
+
+@keyframes AppSpinnerAnimation {
+  from {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+/******************************/
+/*--------- loader ---------*/
+/******************************/
+
+.lds-spinner {
+  color: official;
+  display: inline-block;
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+.lds-spinner div {
+  transform-origin: 20px 20px;
+  animation: lds-spinner 1.2s linear infinite;
+}
+.lds-spinner div:after {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 3px;
+  left: 17px;
+  width: 3px;
+  height: 9px;
+  border-radius: 10%;
+  background: #eeeeef;
+}
+.lds-spinner div:nth-child(1) {
+  transform: rotate(0deg);
+  animation-delay: -1.1s;
+}
+.lds-spinner div:nth-child(2) {
+  transform: rotate(30deg);
+  animation-delay: -1s;
+}
+.lds-spinner div:nth-child(3) {
+  transform: rotate(60deg);
+  animation-delay: -0.9s;
+}
+.lds-spinner div:nth-child(4) {
+  transform: rotate(90deg);
+  animation-delay: -0.8s;
+}
+.lds-spinner div:nth-child(5) {
+  transform: rotate(120deg);
+  animation-delay: -0.7s;
+}
+.lds-spinner div:nth-child(6) {
+  transform: rotate(150deg);
+  animation-delay: -0.6s;
+}
+.lds-spinner div:nth-child(7) {
+  transform: rotate(180deg);
+  animation-delay: -0.5s;
+}
+.lds-spinner div:nth-child(8) {
+  transform: rotate(210deg);
+  animation-delay: -0.4s;
+}
+.lds-spinner div:nth-child(9) {
+  transform: rotate(240deg);
+  animation-delay: -0.3s;
+}
+.lds-spinner div:nth-child(10) {
+  transform: rotate(270deg);
+  animation-delay: -0.2s;
+}
+.lds-spinner div:nth-child(11) {
+  transform: rotate(300deg);
+  animation-delay: -0.1s;
+}
+.lds-spinner div:nth-child(12) {
+  transform: rotate(330deg);
+  animation-delay: 0s;
+}
+@keyframes lds-spinner {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/******************************/
+/*--------- BUTTON ---------*/
+/******************************/
+
+button {
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  font-size: 1rem;
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 500;
+  border: none;
+  min-height: 35px;
+  background: none;
+  text-align: center;
+  text-decoration: none;
+  white-space: pre;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+#NoCSSBtn {
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media screen and (max-width: 480px) {
+  button {
+    min-width: 32px;
+  }
+}
+
+@font-face {
+  font-family: 'icons';
+  src: local("icons"), url("resources/fonts/icons.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icons' !important;
+  font-size: 1rem;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-film:before {
+  content: "\e915";
+  font-size: 5rem;
+}
+
+.icon-settings:before {
+  content: "\e911";
+}
+
+.icon-link:before {
+  font-size: 0.7rem;
+  content: "\e912";
+}
+
+.icon-back:before {
+  font-size: 0.7rem;
+  content: "\e913";
+}
+
+.icon-quote:before {
+  font-size: 1.5rem;
+  content: "\e914";
+}
+
+.icon-download:before {
+  content: "\e90e";
+}
+
+.icon-doc:before {
+  font-size: 0.7rem;
+  content: "\e90d";
+}
+
+.icon-moon:before {
+  font-size: 1.25rem;
+  content: "\e90b";
+}
+
+.icon-sun:before {
+  content: "\e90c";
+}
+
+.icon-down:before {
+  content: "\e901";
+}
+
+.icon-up:before {
+  content: "\e904";
+}
+
+.icon-scrollBack:before {
+  font-size: 1.25rem;
+  content: "\e908";
+}
+
+.icon-nextPage:before {
+  font-size: 0.9rem;
+  content: "\e909";
+}
+
+.icon-next:before {
+  font-size: 1rem;
+  content: "\e90f";
+}
+
+.icon-prev:before {
+  font-size: 1rem;
+  content: "\e910";
+}
+
+.icon-prevPage:before {
+  font-size: 0.9rem;
+  content: "\e90a";
+}
+
+.icon-close:before {
+  content: "\e907";
+}
+
+.icon-menu:before {
+  content: "\e905";
+}
+
+.icon-plus:before {
+  content: "\e906";
+}
+
+.icon-delete:before {
+  content: "\e900";
+}
+
+.icon-edit:before {
+  content: "\e902";
+}
+
+.icon-search:before {
+  content: "\e903";
+}
