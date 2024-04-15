@@ -119,7 +119,7 @@ export class ThemeManager extends Observable {
 
   createLightTheme(): GlobalTheme {
     const black = '#151a1c'
-    const white = '#f0f1f2'
+    const white = '#f5f6f7'
     return {
       id: 'light',
       isLight: true,
@@ -182,12 +182,12 @@ export class ThemeManager extends Observable {
   * */
 
   createDarkTheme(t: GlobalTheme): GlobalTheme {
-    const green = '#acb9c3' //abc3d0
+    const green = '#abb4bc' //abc3d0
     return Object.assign({}, t, {
       id: 'dark',
       isLight: false,
       appBg: '#25262f',
-      header: '#ccdbe8',
+      header: '#d1dae1',
       text: green,
       text50: green + '88',
       red: '#d05f68',

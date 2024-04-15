@@ -1,3 +1,5 @@
+# $ python 3 -u /library/lotman/1994.txt
+
 import argparse
 import os
 import re
