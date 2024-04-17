@@ -1,10 +1,10 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-/public/library
-/public/blog
+/public/repo
 /node_modules
 /.pnp
 .pnp.js
+clientApp
 
 # testing
 /coverage

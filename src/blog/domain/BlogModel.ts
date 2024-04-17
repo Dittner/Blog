@@ -96,7 +96,7 @@ export class Author extends Observable {
     params: any) {
     super('Author')
     this.uid = uid
-    this.link = '/library/' + uid
+    this.link = '/repo/' + uid
     this.fileUrl = fileUrl
     this.photoUrl = params[AUTHOR_KEY_PHOTO]
     this.fullName = params[AUTHOR_KEY_NAME]
@@ -144,14 +144,16 @@ export class Author extends Observable {
 * */
 
 export const BOOK_KEY_TITLE = 'TITLE'
+export const BOOK_KEY_COVER = 'COVER'
 export const BOOK_KEY_YEAR = 'YEAR'
 export const BOOK_KEY_ABOUT = 'ABOUT'
 export const BOOK_KEY_MARKDOWN = 'MARKDOWN'
 
 export class Book {
   readonly id: string
-  readonly authorUid: string
+  readonly author: Author
   readonly title: string
+  readonly cover: string
   readonly fileUrl: string
   readonly link: string
   readonly year: string
@@ -159,15 +161,16 @@ export class Book {
   readonly markdown: string
 
   constructor(id: string,
+    author: Author,
     fileUrl: string,
-    authorUid: string,
     markdown: string,
     params: any) {
     this.id = id
-    this.authorUid = authorUid
-    this.link = '/library/' + authorUid + '/' + params[BOOK_KEY_TITLE]
+    this.author = author
+    this.link = '/repo/' + author.uid + '/' + params[BOOK_KEY_TITLE]
     this.fileUrl = fileUrl
     this.title = params[BOOK_KEY_TITLE]
+    this.cover = params[BOOK_KEY_COVER]
     this.year = params[BOOK_KEY_YEAR]
     this.about = params[BOOK_KEY_ABOUT] ?? ''
     this.markdown = markdown

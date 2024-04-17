@@ -8,52 +8,25 @@ export interface GlobalTheme {
   defFontSize: string
   defFontWeight: string
   appBg: string
-  headerBgColor: string
-  controlLinkColor: string
-  controlLinkSelectedColor: string
   white: string
   black: string
-  black05: string
-  black10: string
-  black25: string
-  black50: string
-  black75: string
   header: string
   text: string
   text50: string
   orange: string
   red: string
-  olive: string
   gray: string
   green: string
   blue: string
   pink: string
   purple: string
   violet: string
-  panelBg: string
-  separator: string
   transparent: string
-  code: string
-  search: string
+  menuItem: string
+  menuHoveredItem: string
+  menuSelectedItem: string
   maxBlogTextWidth: string
   maxBlogTextWidthPx: number
-  maxBookTextWidth: string
-  maxBookTextWidthPx: number
-  maxContentWidth: string
-  maxContentWidthPx: number
-  //docs
-  selectedBlockBg: string
-  border: string
-  error: string
-  link: string
-  linkHover: string
-  prevNextPageBtnBg: string
-  docLink: string
-  docLinkIcon: string
-  docLinkHovered: string
-  docLinkBgHovered: string
-  docLinkSelected: string
-  docLinkBgSelected: string
 }
 
 export class ThemeManager extends Observable {
@@ -120,58 +93,32 @@ export class ThemeManager extends Observable {
   createLightTheme(): GlobalTheme {
     const black = '#151a1c'
     const white = '#f5f6f7'
+    const red = '#9f2b5b'
     return {
       id: 'light',
       isLight: true,
-      defFontSize: '1.2rem',
+      defFontSize: '1.25rem',
       defFontWeight: '400',
       appBg: white,
-      headerBgColor: '#24292c',
-      controlLinkColor: '#c5781f',
-      controlLinkSelectedColor: '#ffFFff',
       white,
       orange: '#a56a26',
-      black05: black + '05',
-      black10: black + '10',
-      black25: black + '44',
-      black50: black + '88',
-      black75: black + 'CC',
       black,
       header: black,
       text: black,
       text50: black + '88',
-      red: '#95353d',
-      olive: '#ab9b4d',
+      red,
       gray: '#8a9fb6',
       green: '#7198a9',
       blue: '#084891',
-      pink: '#9434a6',
-      purple: '#551fd9',
-      violet: '#48356a',
-      panelBg: '#e6e6e7',
-      separator: '#283238',
+      pink: '#c7accc',
+      purple: '#7577ff',
+      violet: '#43257c',
       transparent: '#00000000',
-      code: '#244b5e',
-      search: '#DC9B30',
-      maxBlogTextWidth: '650px',
-      maxBlogTextWidthPx: 650,
-      maxBookTextWidth: '900px',
-      maxBookTextWidthPx: 900,
-      maxContentWidth: '1400px',
-      maxContentWidthPx: 1400,
-      //docs
-      border: black + '10',
-      error: '#ff719a',
-      link: '#1a5369',
-      linkHover: black,
-      selectedBlockBg: '#88397b20',
-      prevNextPageBtnBg: '#652664',
-      docLink: black,
-      docLinkIcon: black,
-      docLinkHovered: black,
-      docLinkBgHovered: '#396f8810',
-      docLinkSelected: '#9434a6',
-      docLinkBgSelected: '#00000000'
+      menuItem: black + '88',
+      menuHoveredItem: black,
+      menuSelectedItem: black,
+      maxBlogTextWidth: '850px',
+      maxBlogTextWidthPx: 850
     }
   }
 
@@ -182,27 +129,27 @@ export class ThemeManager extends Observable {
   * */
 
   createDarkTheme(t: GlobalTheme): GlobalTheme {
-    const green = '#abb4bc' //abc3d0
+    const text = '#929da6' //abc3d0
+    const header = '#c4ced6'
+    const red = '#d05f8e'
     return Object.assign({}, t, {
       id: 'dark',
       isLight: false,
-      appBg: '#25262f',
-      header: '#d1dae1',
-      text: green,
-      text50: green + '88',
-      red: '#d05f68',
-      gray: '#778594',
+      appBg: '#17181c', //1b1c21
+      header,
+      text,
+      text50: text + '88',
+      red,
+      gray: '#79848d',
+      green: '#445b65',
       border: '#ffFFff10',
       blue: '#2b79d7',
-      violet: '#6b4f9d',
-      //docs
-      link: '#6eaac0',
-      code: '#ccdbe8',
-      docLink: green + '88',
-      docLinkIcon: green,
-      docLinkHovered: green,
-      docLinkBgHovered: green + '10',
-      docLinkSelected: green
+      violet: '#9695c9',
+      pink: '#c293cc',
+      orange: '#ffa948',
+      menuItem: text,
+      menuHoveredItem: header,
+      menuSelectedItem: header
     })
   }
 
@@ -217,7 +164,7 @@ export class ThemeManager extends Observable {
 
     const h1Props: StylableComponentProps = {
       fontFamily: articleFont,
-      textTransform: 'capitalize',
+      textTransform: 'uppercase',
       fontSize: '2.5rem',
       fontWeight: '700',
       textColor: textHeaderColor
@@ -253,17 +200,20 @@ export class ThemeManager extends Observable {
 
     const h5Props: StylableComponentProps = {
       fontFamily: articleFont,
-      fontSize: '1.25rem',
-      fontWeight: '500',
-      textColor: t.pink
+      fontSize: t.defFontSize,
+      fontWeight: '600',
+      textAlign: 'right',
+      textColor
     }
     buildRule(h5Props, parentSelector, 'h5')
 
     const h6Props: StylableComponentProps = {
       fontFamily: articleFont,
-      fontSize: '1.25rem',
-      fontWeight: '500',
-      textColor: t.purple
+      fontSize: '0.8rem',
+      fontWeight: t.defFontWeight,
+      textAlign: 'right',
+      marginHorizontal: '-50px',
+      textColor: textColor + '88'
     }
     buildRule(h6Props, parentSelector, 'h6')
 
@@ -278,8 +228,8 @@ export class ThemeManager extends Observable {
     const boldProps: StylableComponentProps = {
       fontFamily: articleFont,
       fontSize: t.defFontSize,
-      fontWeight: '600',
-      textColor
+      fontWeight: t.isLight ? '600' : t.defFontWeight,
+      textColor: t.isLight ? textColor : t.header + 'f0'
     }
     buildRule(boldProps, parentSelector, 'strong')
     buildRule(boldProps, parentSelector, 'b')
@@ -293,19 +243,11 @@ export class ThemeManager extends Observable {
     buildRule(globalProps, parentSelector, 'i')
     buildRule(globalProps, parentSelector, 'li')
 
-    const inlineCodeProps: StylableComponentProps = {
-      fontFamily: monoFont,
-      fontSize: t.defFontSize,
-      textColor: t.code
-    }
-    buildRule(inlineCodeProps, parentSelector, 'code')
-    inlineCodeProps.textColor = t.search
-
     buildRule({
       fontFamily: articleFont,
       fontSize: t.defFontSize,
       fontWeight: t.defFontWeight,
-      bgColor: t.search,
+      bgColor: '#ffFF00',
       textColor
     }, parentSelector, 'mark')
 
@@ -321,13 +263,29 @@ export class ThemeManager extends Observable {
     linkProps.textDecoration = 'underline'
     buildRule(linkProps, parentSelector, 'a:hover')
 
+    const blockquoteChildrenProps: StylableComponentProps = {
+      fontSize: '1.1rem',
+      textColor: t.violet
+    }
+    buildRule(blockquoteChildrenProps, parentSelector, 'blockquote p')
+    buildRule(blockquoteChildrenProps, parentSelector, 'blockquote h4')
+
     const blockquoteProps: StylableComponentProps = {
-      fontFamily: articleFont,
+      fontSize: t.defFontSize,
       fontWeight: t.defFontWeight,
-      bgColor: t.text + '07',
-      padding: '50px'
+      bgColor: '#ffFFff02',
+      borderColor: t.violet + '20',
+      paddingHorizontal: '50px',
+      paddingVertical: '50px'
     }
     buildRule(blockquoteProps, parentSelector, 'blockquote')
+
+    const imgProps: StylableComponentProps = {
+      maxWidth: (t.maxBlogTextWidthPx + 100) + 'px',
+      marginHorizontal: '-50px',
+      paddingTop: '50px'
+    }
+    buildRule(imgProps, parentSelector, 'img')
   }
 }
 

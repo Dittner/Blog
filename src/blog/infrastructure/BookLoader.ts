@@ -1,9 +1,9 @@
 import {
   type Author,
   AuthorLoadStatus,
-  Book, BOOK_KEY_ABOUT, BOOK_KEY_MARKDOWN,
+  Book, BOOK_KEY_ABOUT, BOOK_KEY_COVER, BOOK_KEY_MARKDOWN,
   BOOK_KEY_TITLE, BOOK_KEY_YEAR
-} from '../domain/LibraryModel'
+} from '../domain/BlogModel'
 
 export class BookLoader {
   private readonly parser: BookParser
@@ -30,7 +30,7 @@ export class BookLoader {
   }
 
   readonly loadBook = async(a: Author, bookId: string) => {
-    const url = '/library/' + a.uid + '/' + bookId + '.txt'
+    const url = '/repo/' + a.uid + '/' + bookId + '.txt'
     if (a.books.find(b => b.id === bookId)) return
     const response = await fetch(url)
 
@@ -90,6 +90,11 @@ class BookParser {
         continue
       }
 
+      if (key === BOOK_KEY_COVER) {
+        params[key] = value
+        continue
+      }
+
       if (key === BOOK_KEY_YEAR) {
         params[key] = value
         continue
@@ -103,7 +108,7 @@ class BookParser {
       console.warn('BookParser, unknown tag:', key)
     }
     this.validate(params, [BOOK_KEY_TITLE], 'Book: ' + url)
-    return new Book(bookId, url, a.uid, markdown, params)
+    return new Book(bookId, a, url, markdown, params)
   }
 
   private validate(data: any, requiredProps: string[], entityName: string): void {

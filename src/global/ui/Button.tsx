@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { themeManager } from '../../application/ThemeManager'
+import { themeManager } from '../application/ThemeManager'
 import { Button, type ButtonProps } from 'react-nocss'
 
 export const TextButton = (props: ButtonProps) => {
@@ -48,6 +48,7 @@ export const IconButton = (props: IconButtonProps) => {
 
   return <Button className={'icon-' + props.icon}
                  paddingHorizontal='10px'
+                 minHeight='40px'
                  bgColor={undefined}
                  textColor={theme.red}
                  hoverState={state => {

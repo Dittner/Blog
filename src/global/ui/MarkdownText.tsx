@@ -1,6 +1,6 @@
 import ReactMarkdown from 'react-markdown'
 import React from 'react'
-import { themeManager } from '../../application/ThemeManager'
+import { themeManager } from '../application/ThemeManager'
 import { buildClassName, type LabelProps, stylable } from 'react-nocss'
 
 export const MarkdownText = stylable((props: LabelProps) => {

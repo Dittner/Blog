@@ -1,17 +1,17 @@
-import { type LibraryContext } from '../LibraryContext'
+import { type BlogContext } from '../BlogContext'
 import {
   Author, AUTHOR_KEY_BIOGRAPHY,
   AUTHOR_KEY_BIRTH_YEAR,
   AUTHOR_KEY_BOOKS_ID,
   AUTHOR_KEY_NAME,
   AuthorLoadStatus
-} from '../domain/LibraryModel'
+} from '../domain/BlogModel'
 
 export class AuthorLoader {
-  private readonly context: LibraryContext
+  private readonly context: BlogContext
   private readonly parser: AuthorParser
 
-  constructor(context: LibraryContext) {
+  constructor(context: BlogContext) {
     this.context = context
     this.parser = new AuthorParser()
   }
@@ -32,7 +32,7 @@ export class AuthorLoader {
   }
 
   private readonly loadAuthorsUID = async() => {
-    const url = '/library/authors.txt'
+    const url = '/repo/authors.txt'
     const response = await fetch(url)
 
     if (response.ok) {
@@ -55,7 +55,7 @@ export class AuthorLoader {
   }
 
   readonly loadAuthor = async(uid: string) => {
-    const url = '/library/' + uid + '/author.txt'
+    const url = '/repo/' + uid + '/author.txt'
     const authorList = this.context.authorList
     if (authorList.findAuthor(a => a.fileUrl === url)) return
     const response = await fetch(url)
