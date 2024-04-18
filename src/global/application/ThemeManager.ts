@@ -144,7 +144,7 @@ export class ThemeManager extends Observable {
       green: '#445b65',
       border: '#ffFFff10',
       blue: '#2b79d7',
-      violet: '#9695c9',
+      violet: '#aeadde',
       pink: '#c293cc',
       orange: '#ffa948',
       menuItem: text,
@@ -202,7 +202,6 @@ export class ThemeManager extends Observable {
       fontFamily: articleFont,
       fontSize: t.defFontSize,
       fontWeight: '600',
-      textAlign: 'right',
       textColor
     }
     buildRule(h5Props, parentSelector, 'h5')
@@ -211,8 +210,6 @@ export class ThemeManager extends Observable {
       fontFamily: articleFont,
       fontSize: '0.8rem',
       fontWeight: t.defFontWeight,
-      textAlign: 'right',
-      marginHorizontal: '-50px',
       textColor: textColor + '88'
     }
     buildRule(h6Props, parentSelector, 'h6')
@@ -228,8 +225,8 @@ export class ThemeManager extends Observable {
     const boldProps: StylableComponentProps = {
       fontFamily: articleFont,
       fontSize: t.defFontSize,
-      fontWeight: t.isLight ? '600' : t.defFontWeight,
-      textColor: t.isLight ? textColor : t.header + 'f0'
+      fontWeight: t.isLight ? 'bold' : t.defFontWeight,
+      textColor: t.isLight ? textColor : '#b8c6d1'
     }
     buildRule(boldProps, parentSelector, 'strong')
     buildRule(boldProps, parentSelector, 'b')
@@ -264,25 +261,27 @@ export class ThemeManager extends Observable {
     buildRule(linkProps, parentSelector, 'a:hover')
 
     const blockquoteChildrenProps: StylableComponentProps = {
-      fontSize: '1.1rem',
-      textColor: t.violet
+      fontSize: t.defFontSize,
+      textAlign: 'center',
+      textColor: t.isLight ? textColor : t.violet
     }
     buildRule(blockquoteChildrenProps, parentSelector, 'blockquote p')
+    blockquoteChildrenProps.textAlign = 'right'
+    blockquoteChildrenProps.paddingTop = '20px'
     buildRule(blockquoteChildrenProps, parentSelector, 'blockquote h4')
 
     const blockquoteProps: StylableComponentProps = {
       fontSize: t.defFontSize,
       fontWeight: t.defFontWeight,
-      bgColor: '#ffFFff02',
-      borderColor: t.violet + '20',
+      bgColor: t.isLight ? textColor + '08' : '#ffFFff02',
+      borderColor: t.isLight ? t.transparent : t.text + '20',
       paddingHorizontal: '50px',
       paddingVertical: '50px'
     }
     buildRule(blockquoteProps, parentSelector, 'blockquote')
 
     const imgProps: StylableComponentProps = {
-      maxWidth: (t.maxBlogTextWidthPx + 100) + 'px',
-      marginHorizontal: '-50px',
+      maxWidth: (t.maxBlogTextWidthPx + 200) + 'px',
       paddingTop: '50px'
     }
     buildRule(imgProps, parentSelector, 'img')

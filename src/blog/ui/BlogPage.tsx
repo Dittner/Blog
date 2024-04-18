@@ -7,7 +7,6 @@ import {
   Image,
   Label, type LabelProps, LinkButton,
   type LinkButtonProps,
-  Rectangle,
   Spacer,
   stylable,
   StylableContainer,
@@ -64,7 +63,7 @@ export const BlogPage = observer(() => {
       <VStack halign='center' valign='center'
               layer={LayoutLayer.ZERO}
               width='100%' maxWidth={theme.maxBlogTextWidth}
-              height='100%'
+              height='100%' paddingBottom='50px'
               gap='80px'>
 
         {!selectedAuthor &&
@@ -108,18 +107,18 @@ const BlogMenuView = observer(stylable((props: BlogMenuViewProps) => {
 
   if (!blogMenu.isShown) return <></>
 
-  return <VStack halign='left' valign='top'
-                 gap='5px' width='100%' height='100vh'
-                 bgColor={theme.appBg + 'cc'}
+  return <VStack width='100%' height='100vh' gap='5px'
                  paddingTop='100px'
                  paddingLeft='20px'
+                 bgColor={theme.appBg + 'dd'}
                  layer={LayoutLayer.MODAL}>
 
     {authorList.authors.map(author => {
       const isSelected = selectedAuthor?.uid === author.uid
-      return <>
-        <MenuLinkBtn key={author.uid}
-                     width='100%'
+      return <VStack key={author.uid}
+                     gap='5px'
+                     width='100%'>
+        <MenuLinkBtn width='100%'
                      textColor={isSelected && !selectedBook ? theme.menuSelectedItem : theme.menuItem}
                      fontWeight={isSelected && !selectedBook ? 'bold' : theme.defFontWeight}
                      title={author.shortName}
@@ -139,12 +138,13 @@ const BlogMenuView = observer(stylable((props: BlogMenuViewProps) => {
                                 fontWeight={isSelected ? 'bold' : theme.defFontWeight}
                                 title={book.year ? book.title + '. ' + book.year : book.title}
                                 link={'/repo/' + author.uid + '/' + book.id}
+                                onClick={() => { console.log('CLICK!!') }}
                                 hoverState={state => {
                                   state.textColor = isSelected ? theme.menuSelectedItem : theme.menuHoveredItem
                                   state.textDecoration = 'none'
                                 }}/>
           })}
-      </>
+      </VStack>
     })}
   </VStack>
 }))
@@ -241,17 +241,17 @@ const BookTitle = observer((props: BookViewProps) => {
             valign='center' halign='center'
             gap='50px' paddingBottom='50px'>
 
-      <Rectangle width='100%' height='100%'
-                 layer={LayoutLayer.MINUS}
-                 bgColor={theme.isLight ? '#ffFFff' : '#000000'}
-                 left='0' top='0' position='absolute'/>
+      {/*<Rectangle width='100%' height='100%'*/}
+      {/*           layer={LayoutLayer.MINUS}*/}
+      {/*           bgColor={theme.green + '50'}*/}
+      {/*           left='0' top='0' position='absolute'/>*/}
 
       <StylableContainer width='100%' height='100vh'
                          layer={LayoutLayer.MINUS}
                          bgImageSrc={props.book.cover}
                          bgImageAttachment='scroll'
                          bgImageRepeat='no-repeat'
-                         bgImageSize='cover' opacity='0.3'
+                         bgImageSize='cover' opacity={theme.isLight ? '0.2' : '0.3'}
                          left='0' top='0' position='absolute'/>
 
       <Spacer/>
