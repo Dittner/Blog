@@ -93,7 +93,7 @@ export class ThemeManager extends Observable {
   createLightTheme(): GlobalTheme {
     const black = '#151a1c'
     const white = '#f5f6f7'
-    const red = '#9f2b5b'
+    const red = '#86244d'
     return {
       id: 'light',
       isLight: true,
@@ -129,14 +129,15 @@ export class ThemeManager extends Observable {
   * */
 
   createDarkTheme(t: GlobalTheme): GlobalTheme {
-    const text = '#929da6' //abc3d0
-    const header = '#c4ced6'
+    const text = '#96a2ac' //abc3d0
+    const white = '#c4ced6'
     const red = '#d05f8e'
     return Object.assign({}, t, {
       id: 'dark',
       isLight: false,
-      appBg: '#17181c', //1b1c21
-      header,
+      appBg: '#1d1e23', //1b1c21
+      white,
+      header: white,
       text,
       text50: text + '88',
       red,
@@ -147,9 +148,9 @@ export class ThemeManager extends Observable {
       violet: '#aeadde',
       pink: '#c293cc',
       orange: '#ffa948',
-      menuItem: text,
-      menuHoveredItem: header,
-      menuSelectedItem: header
+      menuItem: text + '88',
+      menuHoveredItem: white,
+      menuSelectedItem: white
     })
   }
 
@@ -210,7 +211,7 @@ export class ThemeManager extends Observable {
       fontFamily: articleFont,
       fontSize: '0.8rem',
       fontWeight: t.defFontWeight,
-      textColor: textColor + '88'
+      textColor: t.text50
     }
     buildRule(h6Props, parentSelector, 'h6')
 
@@ -225,7 +226,7 @@ export class ThemeManager extends Observable {
     const boldProps: StylableComponentProps = {
       fontFamily: articleFont,
       fontSize: t.defFontSize,
-      fontWeight: t.isLight ? 'bold' : t.defFontWeight,
+      fontWeight: t.isLight ? '600' : t.defFontWeight,
       textColor: t.isLight ? textColor : '#b8c6d1'
     }
     buildRule(boldProps, parentSelector, 'strong')
@@ -262,8 +263,8 @@ export class ThemeManager extends Observable {
 
     const blockquoteChildrenProps: StylableComponentProps = {
       fontSize: t.defFontSize,
-      textAlign: 'center',
-      textColor: t.isLight ? textColor : t.violet
+      textAlign: 'left',
+      textColor: t.isLight ? t.violet : t.violet
     }
     buildRule(blockquoteChildrenProps, parentSelector, 'blockquote p')
     blockquoteChildrenProps.textAlign = 'right'
@@ -271,12 +272,7 @@ export class ThemeManager extends Observable {
     buildRule(blockquoteChildrenProps, parentSelector, 'blockquote h4')
 
     const blockquoteProps: StylableComponentProps = {
-      fontSize: t.defFontSize,
-      fontWeight: t.defFontWeight,
-      bgColor: t.isLight ? textColor + '08' : '#ffFFff02',
-      borderColor: t.isLight ? t.transparent : t.text + '20',
-      paddingHorizontal: '50px',
-      paddingVertical: '50px'
+      paddingVertical: '20px'
     }
     buildRule(blockquoteProps, parentSelector, 'blockquote')
 

@@ -1,8 +1,12 @@
 import {
   type Author,
   AuthorLoadStatus,
-  Book, BOOK_KEY_ABOUT, BOOK_KEY_COVER, BOOK_KEY_MARKDOWN,
-  BOOK_KEY_TITLE, BOOK_KEY_YEAR
+  Book,
+  BOOK_KEY_ABOUT,
+  BOOK_KEY_COVER, BOOK_KEY_GENRE,
+  BOOK_KEY_MARKDOWN,
+  BOOK_KEY_TITLE,
+  BOOK_KEY_YEAR
 } from '../domain/BlogModel'
 
 export class BookLoader {
@@ -73,6 +77,7 @@ class BookParser {
     const keyValues = data.split('\n\n')
     const params: any = {}
     let markdown = ''
+    const keys = [BOOK_KEY_TITLE, BOOK_KEY_COVER, BOOK_KEY_YEAR, BOOK_KEY_ABOUT, BOOK_KEY_GENRE]
 
     for (let i = 0; i < keyValues.length; i++) {
       const keyValue = keyValues[i]
@@ -85,22 +90,7 @@ class BookParser {
         break
       }
 
-      if (key === BOOK_KEY_TITLE) {
-        params[key] = value
-        continue
-      }
-
-      if (key === BOOK_KEY_COVER) {
-        params[key] = value
-        continue
-      }
-
-      if (key === BOOK_KEY_YEAR) {
-        params[key] = value
-        continue
-      }
-
-      if (key === BOOK_KEY_ABOUT) {
+      if (keys.includes(key)) {
         params[key] = value
         continue
       }

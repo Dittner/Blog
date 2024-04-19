@@ -146,6 +146,7 @@ export class Author extends Observable {
 export const BOOK_KEY_TITLE = 'TITLE'
 export const BOOK_KEY_COVER = 'COVER'
 export const BOOK_KEY_YEAR = 'YEAR'
+export const BOOK_KEY_GENRE = 'GENRE'
 export const BOOK_KEY_ABOUT = 'ABOUT'
 export const BOOK_KEY_MARKDOWN = 'MARKDOWN'
 
@@ -157,6 +158,7 @@ export class Book {
   readonly fileUrl: string
   readonly link: string
   readonly year: string
+  readonly genre: 'movie' | 'philosophy' | 'literature'
   readonly about: string
   readonly markdown: string
 
@@ -172,6 +174,7 @@ export class Book {
     this.title = params[BOOK_KEY_TITLE]
     this.cover = params[BOOK_KEY_COVER]
     this.year = params[BOOK_KEY_YEAR]
+    this.genre = params[BOOK_KEY_GENRE]
     this.about = params[BOOK_KEY_ABOUT] ?? ''
     this.markdown = markdown
   }

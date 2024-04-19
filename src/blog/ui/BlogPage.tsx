@@ -110,7 +110,6 @@ const BlogMenuView = observer(stylable((props: BlogMenuViewProps) => {
   return <VStack width='100%' height='100vh' gap='5px'
                  paddingTop='100px'
                  paddingLeft='20px'
-                 bgColor={theme.appBg + 'dd'}
                  layer={LayoutLayer.MODAL}>
 
     {authorList.authors.map(author => {
@@ -138,7 +137,6 @@ const BlogMenuView = observer(stylable((props: BlogMenuViewProps) => {
                                 fontWeight={isSelected ? 'bold' : theme.defFontWeight}
                                 title={book.year ? book.title + '. ' + book.year : book.title}
                                 link={'/repo/' + author.uid + '/' + book.id}
-                                onClick={() => { console.log('CLICK!!') }}
                                 hoverState={state => {
                                   state.textColor = isSelected ? theme.menuSelectedItem : theme.menuHoveredItem
                                   state.textDecoration = 'none'
@@ -205,9 +203,15 @@ const BookView = observer(stylable((props: BookViewProps) => {
     <VStack textColor={theme.text}
             className='article'
             valign="top"
-            gap="40px"
+            gap="0"
             width="100%" maxWidth={theme.maxBlogTextWidth}>
       <BookTitle book={props.book}/>
+      {props.book.cover &&
+        <BookCover book={props.book}/>
+      }
+
+      <Spacer height='50px'/>
+
       <MarkdownText width='100%'
                     text={props.book.markdown}/>
     </VStack>
@@ -216,78 +220,58 @@ const BookView = observer(stylable((props: BookViewProps) => {
 
 const BookTitle = observer((props: BookViewProps) => {
   const theme = themeManager.theme
-  if (!props.book.cover) {
-    return (<VStack width='100%'
-                    halign='left' valign='center'
-                    paddingVertical='10px'>
-        <Label width='100%'
-               textAlign='left'
-               className='article'
-               textColor={theme.header}
-               fontWeight='bold'
-               textTransform='uppercase'
-               fontSize='2.5rem'
-               paddingTop='40px'
-               text={props.book.title}/>
-
-        <BookAnnotation authorName={props.book.author.shortName}
-                        bookYear={props.book.year}
-                        textColor={theme.text50}/>
-      </VStack>
-    )
-  }
-  return (
-    <VStack width='100%' height='100vh'
-            valign='center' halign='center'
-            gap='50px' paddingBottom='50px'>
+  return (<VStack width='100%' minHeight={props.book.cover ? '100vh' : '0'}
+                  valign='center' halign='left'
+                  gap='30px'
+                  paddingVertical='50px'>
 
       {/*<Rectangle width='100%' height='100%'*/}
       {/*           layer={LayoutLayer.MINUS}*/}
       {/*           bgColor={theme.green + '50'}*/}
       {/*           left='0' top='0' position='absolute'/>*/}
 
-      <StylableContainer width='100%' height='100vh'
-                         layer={LayoutLayer.MINUS}
-                         bgImageSrc={props.book.cover}
-                         bgImageAttachment='scroll'
-                         bgImageRepeat='no-repeat'
-                         bgImageSize='cover' opacity={theme.isLight ? '0.2' : '0.3'}
-                         left='0' top='0' position='absolute'/>
-
-      <Spacer/>
-
-      <Label textColor={theme.header}
-             width='100%' textAlign='center'>
-        <span className="icon icon-film"/>
-      </Label>
+      {props.book.genre === 'movie' &&
+        <Label textColor={theme.header} paddingBottom='30px'
+               width='100%' textAlign='center'>
+          <span className="icon icon-film"/>
+        </Label>
+      }
 
       <Label width='100%'
-             textAlign='center'
+             textAlign='left'
              className='article'
              textColor={theme.header}
              fontWeight='bold'
              textTransform='uppercase'
              letterSpacing='2px'
-             fontSize='3rem'
+             fontSize='2.5rem'
              text={props.book.title}/>
 
-      <Label width='100%' textAlign='left'
+      <BookAnnotation authorName={props.book.author.shortName}
+                      bookYear={props.book.year}
+                      textColor={theme.text50}/>
+
+      <Label textAlign='left'
              className='article'
              textColor={theme.header}
              fontSize='1.1rem'
              text={props.book.about}/>
 
-      <Spacer/>
-
-      <BookAnnotation authorName={props.book.author.shortName}
-                      bookYear={props.book.year}
-                      paddingHorizontal='10px'
-                      textColor={theme.white}
-                      bgColor={theme.black}/>
-
     </VStack>
   )
 })
+
+const BookCover = (props: BookViewProps) => {
+  return <VStack width='100vw' height='100vh'>
+    <StylableContainer width='100vw' height='100vh'
+                       layer={LayoutLayer.MINUS}
+                       bgImageSrc={props.book.cover}
+                       bgImageAttachment='scroll'
+                       bgImageRepeat='no-repeat'
+                       bgImageSize='cover' opacity='0.6'
+                       left='0' position='absolute'/>
+  </VStack>
+}
 
 interface BookAnnotationProps extends LabelProps {
   authorName: string

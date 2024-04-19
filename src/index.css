@@ -62,9 +62,9 @@ body {
   max-width: 100%;
   overflow-x: hidden;
   overflow-y: scroll;
+  caret-shape: auto;
   /*add scroll track to all screens*/
   /*overflow-y: scroll;*/
-  caret-shape: auto;
 }
 
 body, p, a, b, i, h1, h2, h3, h4, h5, h6, blockquote {

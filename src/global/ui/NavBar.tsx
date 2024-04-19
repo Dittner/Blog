@@ -22,9 +22,7 @@ export const NavBar = observer(() => {
   return <HStack fontSize='0.9rem' position='fixed'
                  top='0' left='0'
                  halign='left' valign='center'
-                 width='100%'
-                 height='40px' margin='0'
-                 gap="5px"
+                 width='100%' height='40px' gap="5px"
                  layer={LayoutLayer.HEADER}>
     <IconButton icon={theme.isLight ? 'sun' : 'moon'} onClick={() => {
       theme.isLight ? themeManager.setDarkTheme() : themeManager.setLightTheme()
@@ -45,7 +43,7 @@ export const NavBar = observer(() => {
               blogMenu.isShown = !blogMenu.isShown
             }}
             selectedState={(state: ButtonProps) => {
-              state.textColor = theme.isLight ? theme.black : theme.white
+              state.textColor = theme.header
             }}/>
 
     {selectedAuthor &&
