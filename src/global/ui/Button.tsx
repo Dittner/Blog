@@ -52,8 +52,7 @@ export const IconButton = (props: IconButtonProps) => {
                  bgColor={undefined}
                  textColor={theme.red}
                  hoverState={state => {
-                   state.textColor = theme.white
-                   state.bgColor = theme.isLight ? theme.red : theme.transparent
+                   state.textColor = theme.isLight ? theme.red + 'cc' : theme.header
                  }}
                  selectedState={state => {
                    state.textColor = theme.white

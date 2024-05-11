@@ -1,18 +1,20 @@
-import { uid } from '../global/domain/UIDGenerator'
+import { generateUID } from '../global/domain/UIDGenerator'
 import { observe } from 'react-observable-mutations'
 import { useBlogContext } from '../App'
 import { AuthorList } from './domain/BlogModel'
-import { AuthorLoader } from './infrastructure/AuthorLoader'
-import { BookLoader } from './infrastructure/BookLoader'
 import { BlogMenu } from './ui/BlogMenu'
+import { Editor } from './ui/Editor'
+import { BooksRepo } from './infrastructure/BooksRepo'
+import { RestApi } from './infrastructure/backend/RestApi'
 
 export class BlogContext {
-  readonly uid = uid()
+  readonly uid = generateUID()
   readonly authorList: AuthorList
-  readonly authorLoader: AuthorLoader
-  readonly bookLoader: BookLoader
   readonly authorsUID: string[]
   readonly blogMenu: BlogMenu
+  readonly editor: Editor
+  readonly restApi: RestApi
+  readonly repo: BooksRepo
 
   static self: BlogContext
 
@@ -25,11 +27,24 @@ export class BlogContext {
 
   private constructor() {
     this.authorsUID = []
-    this.authorLoader = new AuthorLoader(this)
-    this.bookLoader = new BookLoader()
     this.authorList = new AuthorList()
     this.blogMenu = new BlogMenu()
+    this.editor = new Editor()
+    this.restApi = new RestApi(this)
+    this.repo = new BooksRepo(this.restApi)
   }
+}
+
+export function observeEditor(): Editor {
+  return observe(useBlogContext().editor)
+}
+
+export function observeRepo(): BooksRepo {
+  return observe(useBlogContext().repo)
+}
+
+export function observeApi(): RestApi {
+  return observe(useBlogContext().restApi)
 }
 
 export function observeAuthorList(): AuthorList {

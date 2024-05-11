@@ -1,0 +1,3 @@
+#!/bin/sh
+echo "2/2: Running client..."
+cd "/Users/dittner/Documents/PROJECTS/Blog" && npm run client

@@ -1,4 +1,4 @@
-import { uid } from '../domain/UIDGenerator'
+import { generateUID } from '../domain/UIDGenerator'
 import { Observable } from 'react-observable-mutations'
 
 export enum LayoutLayer {
@@ -34,11 +34,23 @@ export class Application extends Observable {
     }
   }
 
+  //--------------------------------------
+  //  errorMsg
+  //--------------------------------------
+  private _errorMsg: string = ''
+  get errorMsg(): string { return this._errorMsg }
+  set errorMsg(value: string) {
+    if (this._errorMsg !== value) {
+      this._errorMsg = value
+      this.mutated()
+    }
+  }
+
   public readonly isMobileDevice: boolean
 
   constructor() {
     super('App')
-    this.uid = uid()
+    this.uid = generateUID()
     this._size = this.evaluateAppSize()
     this.isMobileDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0)
 

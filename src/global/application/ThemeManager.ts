@@ -1,4 +1,4 @@
-import { uid } from '../domain/UIDGenerator'
+import { generateUID } from '../domain/UIDGenerator'
 import { Observable, observe } from 'react-observable-mutations'
 import { buildRule, type StylableComponentProps } from 'react-nocss'
 
@@ -13,6 +13,7 @@ export interface GlobalTheme {
   header: string
   text: string
   text50: string
+  editorText: string
   orange: string
   red: string
   gray: string
@@ -21,6 +22,9 @@ export interface GlobalTheme {
   pink: string
   purple: string
   violet: string
+  quote: string
+  selectedBlockBg: string
+  modalViewBg: string
   transparent: string
   menuItem: string
   menuHoveredItem: string
@@ -67,7 +71,7 @@ export class ThemeManager extends Observable {
 
   constructor() {
     super('ThemeManager')
-    this.uid = uid()
+    this.uid = generateUID()
 
     this._lightTheme = this.createLightTheme()
     this._darkTheme = this.createDarkTheme(this._lightTheme)
@@ -106,19 +110,23 @@ export class ThemeManager extends Observable {
       header: black,
       text: black,
       text50: black + '88',
+      editorText: black,
       red,
       gray: '#8a9fb6',
       green: '#7198a9',
       blue: '#084891',
       pink: '#c7accc',
-      purple: '#7577ff',
+      purple: '#b09ae9',
       violet: '#43257c',
+      quote: '#664a80',
+      selectedBlockBg: '#88397b10',
+      modalViewBg: '#e5d8f1',
       transparent: '#00000000',
       menuItem: black + '88',
       menuHoveredItem: black,
       menuSelectedItem: black,
-      maxBlogTextWidth: '850px',
-      maxBlogTextWidthPx: 850
+      maxBlogTextWidth: '950px',
+      maxBlogTextWidthPx: 950
     }
   }
 
@@ -129,25 +137,29 @@ export class ThemeManager extends Observable {
   * */
 
   createDarkTheme(t: GlobalTheme): GlobalTheme {
-    const text = '#96a2ac' //abc3d0
-    const white = '#c4ced6'
+    const text = '#96a0ad' //abc3d0
+    const white = '#b4c1d0'
     const red = '#d05f8e'
     return Object.assign({}, t, {
       id: 'dark',
       isLight: false,
-      appBg: '#1d1e23', //1b1c21
+      appBg: '#191a1d', //1b1c21
       white,
       header: white,
       text,
       text50: text + '88',
+      editorText: '#7590a7',
       red,
       gray: '#79848d',
-      green: '#445b65',
+      green: '#6c8f9f',
       border: '#ffFFff10',
       blue: '#2b79d7',
       violet: '#aeadde',
+      purple: '#321f60',
+      quote: '#84a0b6',
       pink: '#c293cc',
-      orange: '#ffa948',
+      orange: '#84662f',
+      modalViewBg: '#43354b',
       menuItem: text + '88',
       menuHoveredItem: white,
       menuSelectedItem: white
@@ -227,7 +239,7 @@ export class ThemeManager extends Observable {
       fontFamily: articleFont,
       fontSize: t.defFontSize,
       fontWeight: t.isLight ? '600' : t.defFontWeight,
-      textColor: t.isLight ? textColor : '#b8c6d1'
+      textColor: t.isLight ? textColor : t.header
     }
     buildRule(boldProps, parentSelector, 'strong')
     buildRule(boldProps, parentSelector, 'b')
@@ -240,6 +252,16 @@ export class ThemeManager extends Observable {
     }
     buildRule(globalProps, parentSelector, 'i')
     buildRule(globalProps, parentSelector, 'li')
+
+    //we are using this rule as selection
+    const codeProps: StylableComponentProps = {
+      fontFamily: articleFont,
+      fontSize: t.defFontSize,
+      bgColor: t.purple,
+      paddingVertical: '5px',
+      textColor
+    }
+    buildRule(codeProps, parentSelector, 'code')
 
     buildRule({
       fontFamily: articleFont,
@@ -261,20 +283,34 @@ export class ThemeManager extends Observable {
     linkProps.textDecoration = 'underline'
     buildRule(linkProps, parentSelector, 'a:hover')
 
-    const blockquoteChildrenProps: StylableComponentProps = {
+    const blockquoteContentProps: StylableComponentProps = {
+      bgColor: t.header + '05',
+      borderColor: t.header + '10',
+      cornerRadius: '10px',
+      paddingHorizontal: '40px',
+      paddingVertical: '20px',
+      marginBottom: '20px'
+    }
+    buildRule(blockquoteContentProps, parentSelector, 'blockquote')
+
+    const blockquoteTextProps: StylableComponentProps = {
       fontSize: t.defFontSize,
       textAlign: 'left',
-      textColor: t.isLight ? t.violet : t.violet
+      textColor: t.quote
     }
-    buildRule(blockquoteChildrenProps, parentSelector, 'blockquote p')
-    blockquoteChildrenProps.textAlign = 'right'
-    blockquoteChildrenProps.paddingTop = '20px'
-    buildRule(blockquoteChildrenProps, parentSelector, 'blockquote h4')
+    buildRule(blockquoteTextProps, parentSelector, 'blockquote p')
 
-    const blockquoteProps: StylableComponentProps = {
-      paddingVertical: '20px'
+    const blockquoteAuthorProps: StylableComponentProps = {
+      fontSize: t.defFontSize,
+      textAlign: 'right',
+      textColor: t.quote
     }
-    buildRule(blockquoteProps, parentSelector, 'blockquote')
+    buildRule(blockquoteAuthorProps, parentSelector, 'blockquote h4')
+
+    // const blockquoteProps: StylableComponentProps = {
+    //   paddingVertical: '20px'
+    // }
+    // buildRule(blockquoteProps, parentSelector, 'blockquote')
 
     const imgProps: StylableComponentProps = {
       maxWidth: (t.maxBlogTextWidthPx + 200) + 'px',

@@ -1,0 +1,3 @@
+#!/bin/sh
+echo "1/2: Running server..."
+cd /Users/dittner/Documents/PROJECTS/Blog && python3 run_server.py

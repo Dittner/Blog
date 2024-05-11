@@ -1,10 +1,10 @@
 import { Application } from './application/Application'
 import { useGlobalContext } from '../App'
-import { uid } from './domain/UIDGenerator'
+import { generateUID } from './domain/UIDGenerator'
 import { observe } from 'react-observable-mutations'
 
 export class GlobalContext {
-  readonly uid = uid()
+  readonly uid = generateUID()
   readonly app: Application
 
   static self: GlobalContext
