@@ -51,25 +51,28 @@ export class Editor extends Observable {
   private onKeyDown(e: KeyboardEvent) {
     //Ctrl + Shift + P
     //console.log('Ctrl + Shift + ', e.keyCode)
-    if (this.editMode && (this.selectedPage) && e.ctrlKey && e.key === 'P' && e.shiftKey) {
-      e.preventDefault()
-      e.stopPropagation()
-      if (this.selectedPage) {
-        const curPageIndex = this.selectedPage.book.pages.findIndex(p => p.uid === this.selectedPage?.uid)
-        this.selectedPage = this.selectedPage.book.createPage(curPageIndex + 1)
+    if (e.ctrlKey && e.shiftKey) {
+      if (e.keyCode === 83) {
+        e.preventDefault()
+        e.stopPropagation()
+        BlogContext.self.repo.store()
       }
-    }
-    //Ctrl + Shift + S
-    else if (e.ctrlKey && e.keyCode === 83 && e.shiftKey) {
-      e.preventDefault()
-      e.stopPropagation()
-      BlogContext.self.repo.store()
-    }
-    //Ctrl + Shift + E
-    else if (e.ctrlKey && e.keyCode === 69 && e.shiftKey) {
-      e.preventDefault()
-      e.stopPropagation()
-      this.toggleEditMode()
+      //Ctrl + Shift + E
+      else if (e.keyCode === 69) {
+        e.preventDefault()
+        e.stopPropagation()
+        this.toggleEditMode()
+      }
+      //Ctrl + Shift + F
+      else if (this.editMode && e.keyCode === 70) {
+        e.preventDefault()
+        e.stopPropagation()
+        const text = this.startFormatting(this.inputTextBuffer.value)
+        if (this.inputTextBuffer.value !== text) {
+          this.inputTextBuffer.value = text
+          this.mutated()
+        }
+      }
     }
   }
 
@@ -162,7 +165,11 @@ export class Editor extends Observable {
     }
 
     if (this.removeHyphenAndSpace) {
-      res = res.replace(/[^ ]- /g, '')
+      res = res.replace(/^-/, '—')
+      res = res.replace(/-$/, '—')
+      res = res.replaceAll('\n-', '\n—')
+      res = res.replaceAll('-\n', '—\n')
+      res = res.replace(/([А-я])- /g, '$1')
     }
 
     if (this.replaceHyphenWithDash) {

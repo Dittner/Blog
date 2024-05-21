@@ -97,7 +97,7 @@ export class ThemeManager extends Observable {
   createLightTheme(): GlobalTheme {
     const black = '#151a1c'
     const white = '#f5f6f7'
-    const red = '#86244d'
+    const red = '#c13a6a'
     return {
       id: 'light',
       isLight: true,
@@ -118,12 +118,12 @@ export class ThemeManager extends Observable {
       pink: '#c7accc',
       purple: '#b09ae9',
       violet: '#43257c',
-      quote: '#664a80',
-      selectedBlockBg: '#88397b10',
+      quote: '#58317c',
+      selectedBlockBg: black + '10',
       modalViewBg: '#e5d8f1',
       transparent: '#00000000',
       menuItem: black + '88',
-      menuHoveredItem: black,
+      menuHoveredItem: red,
       menuSelectedItem: black,
       maxBlogTextWidth: '950px',
       maxBlogTextWidthPx: 950
@@ -137,18 +137,18 @@ export class ThemeManager extends Observable {
   * */
 
   createDarkTheme(t: GlobalTheme): GlobalTheme {
-    const text = '#96a0ad' //abc3d0
-    const white = '#b4c1d0'
-    const red = '#d05f8e'
+    const text = '#a3adbb' //abc3d0
+    const white = '#c6d4e3'
+    const red = '#e96b9a'
     return Object.assign({}, t, {
       id: 'dark',
       isLight: false,
-      appBg: '#191a1d', //1b1c21
+      appBg: '#1f2024', //1b1c21
       white,
       header: white,
       text,
       text50: text + '88',
-      editorText: '#7590a7',
+      editorText: '#a99aa3',
       red,
       gray: '#79848d',
       green: '#6c8f9f',
@@ -156,12 +156,13 @@ export class ThemeManager extends Observable {
       blue: '#2b79d7',
       violet: '#aeadde',
       purple: '#321f60',
-      quote: '#84a0b6',
+      quote: '#7fa3bf',
       pink: '#c293cc',
       orange: '#84662f',
+      selectedBlockBg: text + '10',
       modalViewBg: '#43354b',
       menuItem: text + '88',
-      menuHoveredItem: white,
+      menuHoveredItem: red,
       menuSelectedItem: white
     })
   }
@@ -170,6 +171,7 @@ export class ThemeManager extends Observable {
     const parentSelector = t.id
     const monoFont = 'var(--font-family-mono)'
     const articleFont = 'var(--font-family-article)'
+    const font = 'var(--font-family)'
     const textColor = t.text
     const textHeaderColor = t.header
     // const textProps: StylableComponentProps = { textColor: '#86b3c7' }
@@ -284,10 +286,6 @@ export class ThemeManager extends Observable {
     buildRule(linkProps, parentSelector, 'a:hover')
 
     const blockquoteContentProps: StylableComponentProps = {
-      bgColor: t.header + '05',
-      borderColor: t.header + '10',
-      cornerRadius: '10px',
-      paddingHorizontal: '40px',
       paddingVertical: '20px',
       marginBottom: '20px'
     }
@@ -303,6 +301,7 @@ export class ThemeManager extends Observable {
     const blockquoteAuthorProps: StylableComponentProps = {
       fontSize: t.defFontSize,
       textAlign: 'right',
+      paddingTop: '20px',
       textColor: t.quote
     }
     buildRule(blockquoteAuthorProps, parentSelector, 'blockquote h4')

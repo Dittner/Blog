@@ -1,6 +1,6 @@
 {
   "name": "blog",
-  "version": "2.0.2",
+  "version": "3.0.1",
   "private": true,
   "dependencies": {
     "@react-three/fiber": "^8.15.10",
@@ -9,7 +9,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-markdown": "^8.0.7",
-    "react-nocss": "^1.1.3",
+    "react-nocss": "^1.1.4",
     "react-observable-mutations": "^1.0.3",
     "react-router": "^6.11.1",
     "react-router-dom": "^6.11.1",

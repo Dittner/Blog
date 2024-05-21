@@ -71,18 +71,18 @@ export const NavBar = observer(() => {
 
     <Spacer/>
 
-    {selectedBook && api.isServerRunning && <>
-      <RedButton title="Save"
-                 position='absolute' left={(window.innerWidth - 170 >> 1) + 'px'}
-                 paddingHorizontal='50px' cornerRadius='4px'
-                 width='150px' height='35px' padding='0'
-                 popUp='Save Changes (Ctrl + Shift + S)'
-                 visible={repo.isStorePending}
-                 disabled={!repo.isStorePending}
-                 onClick={() => {
-                   repo.store()
-                 }}/>
+    <RedButton title="Save"
+               position='absolute' left={(window.innerWidth - 170 >> 1) + 'px'}
+               paddingHorizontal='50px' cornerRadius='4px'
+               width='150px' height='35px' padding='0'
+               popUp='Save Changes (Ctrl + Shift + S)'
+               visible={repo.isStorePending}
+               disabled={!repo.isStorePending}
+               onClick={() => {
+                 repo.store()
+               }}/>
 
+    {selectedBook && api.isServerRunning && <>
       <ToolsPanel book={selectedBook}/>
 
       <Label whiteSpace="pre"

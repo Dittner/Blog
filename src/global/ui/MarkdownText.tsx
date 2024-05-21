@@ -10,8 +10,9 @@ export const MarkdownText = stylable((props: LabelProps) => {
   let className = 'className' in props ? props.className : ''
   className += ' ' + theme.id + ' '
   className += buildClassName(props)
+  const text = props.text?.replaceAll('\n', '\n\n')
   return <ReactMarkdown className={className}
                         transformImageUri={uri => restApi.assetsUrl + uri }
-                        key={props.keyValue}>{props.text ?? ''}
+                        key={props.keyValue}>{text ?? ''}
   </ReactMarkdown>
 })

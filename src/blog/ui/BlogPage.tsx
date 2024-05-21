@@ -39,6 +39,7 @@ export const BlogPage = observer(() => {
   const selectedBook = selectedAuthor?.findBook(b => b.id === selectedBookId)
   if (selectedAuthor) observe(selectedAuthor)
   const menuWidth = (window.innerWidth - theme.maxBlogTextWidthPx - 120) >> 1
+  if (!selectedBook) editor.editMode = false
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -145,7 +146,7 @@ const MenuLinkBtn = (props: LinkButtonProps) => {
 }
 
 const BlogMenuView = observer(stylable((props: BlogMenuViewProps) => {
-  console.log('new AuthorListView')
+  console.log('new BlogMenuView')
   const authorList = observeAuthorList()
   const blogMenu = observeBlogMenu()
   const theme = themeManager.theme
@@ -292,7 +293,6 @@ const PageView = observer(({ page }: { page: Page }) => {
                            paddingLeft="34px"
                            width="100%"
                            onMouseDown={toggleSelection}
-                           bgColor={theme.selectedBlockBg}
                            borderLeft={['6px', 'solid', theme.red]}>
           <MarkdownText text={page.text}/>
         </StylableContainer>
@@ -335,6 +335,16 @@ const BookTitle = observer((props: BookViewProps) => {
       {/*           bgColor={theme.green + '50'}*/}
       {/*           left='0' top='0' position='absolute'/>*/}
 
+      {/*<StylableContainer width='100vw'*/}
+      {/*                   layer={LayoutLayer.MINUS}*/}
+      {/*                   minHeight={props.book.cover ? '100vh' : '0'}*/}
+      {/*                   bgImageSrc={'/bg.png'}*/}
+      {/*                   bgImageRepeat='no-repeat'*/}
+      {/*                   bgImageAttachment='scroll'*/}
+      {/*                   bgImageSize='cover'*/}
+      {/*                   position='absolute' opacity='0.5'*/}
+      {/*                   top='0' left='0'/>*/}
+
       {props.book.genre === 'movie' &&
         <Label textColor={theme.header} padding='30px'
                width='100%' textAlign='center'>
@@ -371,12 +381,12 @@ const BookCover = (props: BookViewProps) => {
   const theme = themeManager.theme
   const menuWidth = (window.innerWidth - theme.maxBlogTextWidthPx) >> 1
   return <Image containerWidth='100vw'
-           overflow='hidden'
-           width='100%'
-           layer={LayoutLayer.MINUS}
-           alt='Cover Image'
-           src={restApi.baseUrl + '/assets' + props.book.cover}
-           opacity='0.6' position='relative' left={-menuWidth + 'px'}/>
+                overflow='hidden'
+                width='100%'
+                layer={LayoutLayer.MINUS}
+                alt='Cover Image'
+                src={restApi.baseUrl + '/assets' + props.book.cover}
+                opacity='0.6' position='relative' left={-menuWidth + 'px'}/>
 }
 
 interface BookAnnotationProps extends LabelProps {
@@ -393,6 +403,7 @@ const BookAnnotation = (props: BookAnnotationProps) => {
 }
 
 export const EditorView = observer((props: StackProps) => {
+  console.log('new EditorView')
   const editor = observeEditor()
   const theme = themeManager.theme
 
@@ -415,15 +426,16 @@ export const EditorView = observer((props: StackProps) => {
                 className='article listScrollbar'
                 disableHorizontalScroll
                 width='100%' height='100%'
-                textColor={theme.editorText}
+                textColor={theme.text + '88'}
                 borderColor='undefined'
                 fontSize='1.2rem'
                 caretColor={theme.isLight ? '#000000' : theme.red}
                 bgColor={theme.appBg}
                 padding="45px"
                 focusState={(state: StylableComponentProps) => {
-                  state.bgColor = theme.isLight ? '#ffFFff' : '#00000020'
+                  state.textColor = theme.editorText
                 }}
+                keepFocus
                 autoFocus/>
     }
 
