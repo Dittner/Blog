@@ -1,13 +1,13 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import React, { useLayoutEffect, useState } from 'react'
-import { GlobalContext, observeApp } from './global/GlobalContext'
-import { observeThemeManager, themeManager } from './global/application/ThemeManager'
-import { observer } from 'react-observable-mutations'
-import { BlogContext } from './blog/BlogContext'
-import { BlogPage } from './blog/ui/BlogPage'
-import { IconButton } from './global/ui/Button'
-import { HStack, Label } from 'react-nocss'
-import { LayoutLayer } from './global/application/Application'
+import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom'
+import React, {useLayoutEffect, useState} from 'react'
+import {GlobalContext, observeApp} from './global/GlobalContext'
+import {observeThemeManager, themeManager} from './global/application/ThemeManager'
+import {BlogContext} from './blog/BlogContext'
+import {BlogPage} from './blog/ui/BlogPage'
+import {IconButton} from './global/ui/Button'
+import {HStack, Label} from 'react-nocss'
+import {LayoutLayer} from './global/application/Application'
+import {observer} from './lib/rx/RXObserver'
 
 export const API_URL = process.env.REACT_APP_API_URL
 export const IS_DEV_MODE = process.env.REACT_APP_MODE === 'development'
@@ -56,27 +56,30 @@ export const ErrorMsgView = observer(() => {
     return <></>
   }
 
-  return <HStack halign="stretch"
-                 valign="center"
-                 width="100%"
-                 bottom='0'
-                 minHeight="50px"
-                 bgColor={theme.modalViewBg}
-                 layer={LayoutLayer.ERR_MSG}
-                 position='fixed'>
+  return <HStack
+    halign="stretch"
+    valign="center"
+    width="100%"
+    bottom='0'
+    minHeight="50px"
+    bgColor={theme.modalViewBg}
+    layer={LayoutLayer.ERR_MSG}
+    position='fixed'>
 
-    <Label className='ibm'
-           width='100%'
-           textAlign='center'
-           text={app.errorMsg}
-           textColor={theme.text}/>
+    <Label
+      className='ibm'
+      width='100%'
+      textAlign='center'
+      text={app.errorMsg}
+      textColor={theme.text}/>
 
-    <IconButton icon="close"
-                popUp="Close"
-                textColor={theme.text50}
-                hoverState={state =>
-                  state.textColor = theme.text}
-                onClick={close}/>
+    <IconButton
+      icon="close"
+      popUp="Close"
+      textColor={theme.text50}
+      hoverState={state =>
+        state.textColor = theme.text}
+      onClick={close}/>
   </HStack>
 })
 

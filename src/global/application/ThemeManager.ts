@@ -1,6 +1,7 @@
-import { generateUID } from '../domain/UIDGenerator'
-import { Observable, observe } from 'react-observable-mutations'
-import { buildRule, type StylableComponentProps } from 'react-nocss'
+import {generateUID} from '../domain/UIDGenerator'
+import {buildRule, type StylableComponentProps} from 'react-nocss'
+import {RXObservableEntity} from '../../lib/rx/RXPublisher'
+import {observe} from '../../lib/rx/RXObserver'
 
 export interface GlobalTheme {
   id: string
@@ -33,7 +34,7 @@ export interface GlobalTheme {
   maxBlogTextWidthPx: number
 }
 
-export class ThemeManager extends Observable {
+export class ThemeManager extends RXObservableEntity<ThemeManager> {
   readonly uid
 
   private readonly _lightTheme: GlobalTheme
@@ -70,7 +71,7 @@ export class ThemeManager extends Observable {
   }
 
   constructor() {
-    super('ThemeManager')
+    super()
     this.uid = generateUID()
 
     this._lightTheme = this.createLightTheme()
@@ -97,7 +98,7 @@ export class ThemeManager extends Observable {
   createLightTheme(): GlobalTheme {
     const black = '#151a1c'
     const white = '#f5f6f7'
-    const red = '#c13a6a'
+    const red = '#b4466d'
     return {
       id: 'light',
       isLight: true,
@@ -116,7 +117,7 @@ export class ThemeManager extends Observable {
       green: '#7198a9',
       blue: '#084891',
       pink: '#c7accc',
-      purple: '#b09ae9',
+      purple: '#d5caf2',
       violet: '#43257c',
       quote: '#58317c',
       selectedBlockBg: black + '10',
@@ -139,7 +140,7 @@ export class ThemeManager extends Observable {
   createDarkTheme(t: GlobalTheme): GlobalTheme {
     const text = '#a3adbb' //abc3d0
     const white = '#c6d4e3'
-    const red = '#e96b9a'
+    const red = '#df5f83'
     return Object.assign({}, t, {
       id: 'dark',
       isLight: false,
@@ -153,9 +154,9 @@ export class ThemeManager extends Observable {
       gray: '#79848d',
       green: '#6c8f9f',
       border: '#ffFFff10',
-      blue: '#2b79d7',
+      blue: '#5e98de',
       violet: '#aeadde',
-      purple: '#321f60',
+      purple: '#ada7d3',
       quote: '#7fa3bf',
       pink: '#c293cc',
       orange: '#84662f',
@@ -188,9 +189,9 @@ export class ThemeManager extends Observable {
 
     const h2Props: StylableComponentProps = {
       fontFamily: articleFont,
-      fontSize: '1.5rem',
+      fontSize: '1.75rem',
       fontWeight: '600',
-      paddingTop: '30px',
+      paddingVertical: '20px',
       textColor: textHeaderColor
     }
     buildRule(h2Props, parentSelector, 'h2')
@@ -252,6 +253,8 @@ export class ThemeManager extends Observable {
       fontWeight: t.defFontWeight,
       textColor
     }
+    buildRule(globalProps, parentSelector, 'span')
+    buildRule(globalProps, parentSelector, 'div')
     buildRule(globalProps, parentSelector, 'i')
     buildRule(globalProps, parentSelector, 'li')
 
@@ -259,9 +262,9 @@ export class ThemeManager extends Observable {
     const codeProps: StylableComponentProps = {
       fontFamily: articleFont,
       fontSize: t.defFontSize,
-      bgColor: t.purple,
-      paddingVertical: '5px',
-      textColor
+      bgColor: t.isLight ? t.purple : undefined,
+      textColor: t.isLight ? textColor : t.purple,
+      paddingVertical: '5px'
     }
     buildRule(codeProps, parentSelector, 'code')
 
@@ -272,6 +275,12 @@ export class ThemeManager extends Observable {
       bgColor: '#ffFF00',
       textColor
     }, parentSelector, 'mark')
+
+    buildRule({
+      //fontFamily: font,
+      fontSize: '1.5rem',
+      textColor: textHeaderColor
+    }, parentSelector, 'mjx-math')
 
     const linkProps: StylableComponentProps = {
       fontFamily: monoFont,
@@ -286,8 +295,7 @@ export class ThemeManager extends Observable {
     buildRule(linkProps, parentSelector, 'a:hover')
 
     const blockquoteContentProps: StylableComponentProps = {
-      paddingVertical: '20px',
-      marginBottom: '20px'
+      paddingVertical: '20px'
     }
     buildRule(blockquoteContentProps, parentSelector, 'blockquote')
 
@@ -301,7 +309,6 @@ export class ThemeManager extends Observable {
     const blockquoteAuthorProps: StylableComponentProps = {
       fontSize: t.defFontSize,
       textAlign: 'right',
-      paddingTop: '20px',
       textColor: t.quote
     }
     buildRule(blockquoteAuthorProps, parentSelector, 'blockquote h4')

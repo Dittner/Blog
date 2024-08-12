@@ -1,7 +1,7 @@
-import { Application } from './application/Application'
-import { useGlobalContext } from '../App'
-import { generateUID } from './domain/UIDGenerator'
-import { observe } from 'react-observable-mutations'
+import {Application} from './application/Application'
+import {useGlobalContext} from '../App'
+import {generateUID} from './domain/UIDGenerator'
+import {observe} from '../lib/rx/RXObserver'
 
 export class GlobalContext {
   readonly uid = generateUID()

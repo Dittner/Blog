@@ -1,9 +1,10 @@
-import { Observable } from 'react-observable-mutations'
-import { generateUID, type UID } from '../../global/domain/UIDGenerator'
-import { type Book } from '../domain/BlogModel'
-import { type RestApi } from './backend/RestApi'
+import {generateUID, type UID} from '../../global/domain/UIDGenerator'
+import {type Book} from '../domain/BlogModel'
+import {type RestApi} from './backend/RestApi'
+import {RXObservableEntity} from '../../lib/rx/RXPublisher'
+import {GlobalContext} from '../../global/GlobalContext'
 
-export class BooksRepo extends Observable {
+export class BooksRepo extends RXObservableEntity<BooksRepo> {
   readonly uid: UID
   private readonly restApi: RestApi
   private readonly pendingBooksToStore: Book[]
@@ -13,7 +14,7 @@ export class BooksRepo extends Observable {
   }
 
   constructor(restApi: RestApi) {
-    super('BooksRepo')
+    super()
     this.uid = generateUID()
     this.restApi = restApi
     this.pendingBooksToStore = []
@@ -34,7 +35,9 @@ export class BooksRepo extends Observable {
       for (const b of this.pendingBooksToStore) {
         if (hash.has(b.id)) continue
         hash.add(b.id)
-        this.restApi.storeBook(b)
+        this.restApi.storeBook(b).pipe()
+          .onError(e => { GlobalContext.self.app.errorMsg = e.message })
+          .subscribe()
       }
       this.pendingBooksToStore.length = 0
       this.mutated()

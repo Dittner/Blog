@@ -1,5 +1,4 @@
 # Before run the server install flask lib:
-# $ pip install flask
 # $ pip3 install flask
 # $ python3 pip install flask
 # server: http://127.0.0.1:5005

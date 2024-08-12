@@ -1,8 +1,8 @@
-import { type RestApiCmd } from './RestApiCmd'
-import { type RestApi } from '../RestApi'
-import { type Book } from '../../../domain/BlogModel'
+import {type RestApi, type RestApiError, type Runnable} from '../RestApi'
+import {type Book} from '../../../domain/BlogModel'
+import {RXJustComplete, type RXObservable, RXOperation} from '../../../../lib/rx/RXPublisher'
 
-export class StoreBookCmd implements RestApiCmd {
+export class StoreBookCmd implements Runnable {
   private readonly api: RestApi
   private readonly book: Book
 
@@ -11,19 +11,25 @@ export class StoreBookCmd implements RestApiCmd {
     this.book = b
   }
 
-  run() {
-    if (!this.book.isStoring) {
-      this.book.isStoring = true
-      this.store().then()
-    }
+  run(): RXObservable<any, RestApiError> {
+    if (this.book.isStoring) return new RXJustComplete<any, RestApiError>('ok')
+    this.book.isStoring = true
+    const op = new RXOperation<any, RestApiError>()
+    this.store(op).catch((e: RestApiError) => { op.fail(e) })
+    return op.asObservable
   }
 
-  private async store() {
+  private async store(op: RXOperation<any, RestApiError>) {
     const book = this.book
     const method = 'PUT'
     const endPoint = '/dir/' + book.author.id + '/file/' + book.id + '.txt'
     const content = book.serialize()
-    await this.api.sendRequest(method, endPoint, content)
+    const [response, _] = await this.api.sendRequest(method, endPoint, content)
     this.book.isStoring = false
+    if (response?.ok) {
+      op.success('ok')
+    } else {
+      await this.api.handlerError(response)
+    }
   }
 }

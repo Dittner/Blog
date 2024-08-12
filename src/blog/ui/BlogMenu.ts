@@ -1,6 +1,6 @@
-import { Observable } from 'react-observable-mutations'
+import {RXObservableEntity} from '../../lib/rx/RXPublisher'
 
-export class BlogMenu extends Observable {
+export class BlogMenu extends RXObservableEntity<BlogMenu> {
   private _isShown: boolean = true
   get isShown(): boolean { return this._isShown }
   set isShown(value: boolean) {
@@ -8,9 +8,5 @@ export class BlogMenu extends Observable {
       this._isShown = value
       this.mutated()
     }
-  }
-
-  constructor() {
-    super('BlogMenu')
   }
 }

@@ -2,7 +2,31 @@
   --LineHeight: 1.6;
   --font-family: -apple-system,"system-ui", -apple-system, "system-ui", sans-serif;
   --font-family-mono: Menlo, source-code-pro, Monaco, 'Courier New', monospace;
-  --font-family-article: "Verdana Pro", -apple-system, "system-ui", sans-serif;
+  --font-family-article: 'verdana';
+}
+
+@font-face {
+  font-family: 'verdana';
+  src: url('resources/fonts/VerdanaPro-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'verdana';
+  src: url('resources/fonts/VerdanaPro-SemiBold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'verdana';
+  src: url('resources/fonts/VerdanaPro-Italic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+  font-display: block;
 }
 
 .def {
@@ -73,9 +97,21 @@ body, p, a, b, i, h1, h2, h3, h4, h5, h6, blockquote {
   text-decoration: none;
 }
 
+.cm-cursor {
+  width: 2px !important;
+  height: 18px !important;
+  background-color: blue;
+  border-left: 2px solid black;
+  animation: caretAnim 1s infinite forwards !important;
+}
+
 ::selection {
   color: #111111;
   background: #c7a0df;
+}
+
+.blurred {
+  backdrop-filter: blur(8px);
 }
 
 .red {
@@ -115,13 +151,17 @@ a:hover {
 /*--------- SCROLLBAR -----------*/
 /******************************/
 
+.rtl {
+  direction: rtl;
+}
+
 .listScrollbar {
   display: block;
   overflow: auto;
 }
 
 .listScrollbar::-webkit-scrollbar {
-  width: 14px;
+  width: 6px;
 }
 
 .listScrollbar::-webkit-scrollbar-track {
@@ -129,34 +169,12 @@ a:hover {
 }
 
 .listScrollbar::-webkit-scrollbar-thumb {
-  background: #3d454988;
-  border-radius: 5px;
-  border-right: 4px solid transparent;
-  border-left: 4px solid transparent;
+  background: #88888888;
   background-clip: content-box;
 }
 
 .listScrollbar::-webkit-scrollbar-thumb:hover {
-  background: #3d4549;
-  border-radius: 5px;
-  border-right: 4px solid transparent;
-  border-left: 4px solid transparent;
-  background-clip: content-box;
-}
-
-.light.listScrollbar::-webkit-scrollbar-thumb {
-  background: #aaAAaa50;
-  border-radius: 5px;
-  border-right: 4px solid transparent;
-  border-left: 4px solid transparent;
-  background-clip: content-box;
-}
-
-.light.listScrollbar::-webkit-scrollbar-thumb:hover {
-  background: #aaAAaa;
-  border-radius: 5px;
-  border-right: 4px solid transparent;
-  border-left: 4px solid transparent;
+  background: #888888;
   background-clip: content-box;
 }
 
@@ -406,7 +424,7 @@ button {
 }
 
 .icon-link:before {
-  font-size: 0.7rem;
+  font-size: 0.5rem;
   content: "\e912";
 }
 

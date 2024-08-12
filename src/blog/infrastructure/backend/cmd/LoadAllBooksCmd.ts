@@ -1,9 +1,6 @@
-import { type RestApiCmd } from './RestApiCmd'
-import { type RestApi } from '../RestApi'
+import {type RestApi, type RestApiError, type Runnable} from '../RestApi'
 import {
   type Author,
-  type AuthorList,
-  LoadStatus,
   Book,
   BOOK_KEY_ABOUT,
   BOOK_KEY_COVER,
@@ -12,28 +9,27 @@ import {
   BOOK_KEY_TITLE,
   BOOK_KEY_YEAR
 } from '../../../domain/BlogModel'
+import {type RXObservable, RXOperation} from '../../../../lib/rx/RXPublisher'
 
-export class LoadAllBooksCmd implements RestApiCmd {
+export class LoadAllBooksCmd implements Runnable {
   private readonly api: RestApi
-  private readonly authorList: AuthorList
   private readonly parser: BookParser
   private readonly author: Author
 
   constructor(api: RestApi, author: Author) {
     this.api = api
-    this.authorList = api.context.authorList
     this.author = author
+
     this.parser = new BookParser()
   }
 
-  run() {
-    if (this.author.booksLoadStatus === LoadStatus.PENDING) {
-      this.author.booksLoadStatus = LoadStatus.LOADING
-      this.startLoading().then()
-    }
+  run(): RXObservable<Book[], RestApiError> {
+    const op = new RXOperation<any, RestApiError>()
+    this.startLoading(op).catch((e: RestApiError) => { op.fail(e) })
+    return op.asObservable
   }
 
-  private async startLoading() {
+  private async startLoading(op: RXOperation<Book[], RestApiError>) {
     const [response, body] = await this.api.sendRequest('GET', '/dir/' + this.author.id)
     if (response?.ok) {
       const dict: Record<string, string> = body
@@ -41,10 +37,9 @@ export class LoadAllBooksCmd implements RestApiCmd {
       for (const [bookId, bookData] of Object.entries(dict)) {
         books.push(this.parser.parse(bookId, bookData, this.author))
       }
-      this.author.books = books
-      this.author.booksLoadStatus = LoadStatus.LOADED
+      op.success(books)
     } else {
-      this.author.booksLoadStatus = LoadStatus.ERROR
+      await this.api.handlerError(response)
     }
   }
 }
