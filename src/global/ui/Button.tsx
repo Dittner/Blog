@@ -1,18 +1,22 @@
 import * as React from 'react'
-import { themeManager } from '../application/ThemeManager'
-import { Button, type ButtonProps } from 'react-nocss'
+import {themeManager} from '../application/ThemeManager'
+import {Button, type ButtonProps} from 'react-nocss'
 
 export const TextButton = (props: ButtonProps) => {
   if ('visible' in props && !props.visible) return <></>
   const theme = themeManager.theme
 
-  return <Button title={props.title}
-                 bgColor={undefined}
-                 textColor={theme.red}
-                 hoverState={state => {
-                   state.textColor = theme.isLight ? theme.black : theme.white
-                 }}
-                 {...props}/>
+  return <Button
+    fontSize='0.9rem'
+    paddingBottom='1px'
+    minHeight='25px'
+    bgColor={undefined}
+    textColor={theme.red}
+    hoverState={(state: ButtonProps) => {
+      state.btnCursor = true
+      state.textColor = theme.isLight ? theme.red + 'cc' : theme.white
+    }}
+    {...props}/>
 }
 
 /*
@@ -21,7 +25,7 @@ export const TextButton = (props: ButtonProps) => {
 *
 * */
 
-type IconType =
+export type IconType =
   'sun'
   | 'moon'
   | 'down'
@@ -37,6 +41,7 @@ type IconType =
   | 'delete'
   | 'edit'
   | 'link'
+  | 'folder'
 
 interface IconButtonProps extends ButtonProps {
   icon: IconType
@@ -46,22 +51,23 @@ export const IconButton = (props: IconButtonProps) => {
   if ('visible' in props && !props.visible) return <></>
   const theme = themeManager.theme
 
-  return <Button className={'icon-' + props.icon}
-                 paddingHorizontal='10px'
-                 minHeight='40px'
-                 bgColor={undefined}
-                 textColor={theme.red}
-                 hoverState={state => {
-                   state.textColor = theme.isLight ? theme.red + 'cc' : theme.header
-                 }}
-                 selectedState={state => {
-                   state.textColor = theme.white
-                   state.bgColor = theme.isLight ? theme.red : theme.transparent
-                 }}
-                 disabledState={state => {
-                   state.opacity = '1'
-                   state.textColor = theme.text50
-                 }}
-                 onClick={props.onClick}
-                 {...props}/>
+  return <Button
+    className={'icon-' + props.icon}
+    paddingHorizontal='10px'
+    minHeight='40px'
+    bgColor={undefined}
+    textColor={theme.red}
+    hoverState={state => {
+      state.textColor = theme.isLight ? theme.red + 'cc' : theme.header
+    }}
+    selectedState={state => {
+      state.textColor = theme.white
+      state.bgColor = theme.isLight ? theme.red : theme.transparent
+    }}
+    disabledState={state => {
+      state.opacity = '1'
+      state.textColor = theme.text50
+    }}
+    onClick={props.onClick}
+    {...props}/>
 }

@@ -1,38 +1,36 @@
-import {useBlogContext} from '../App'
-import {User} from './domain/BlogModel'
-import {BlogMenu} from './ui/BlogMenu'
-import {Editor} from './ui/Editor'
-import {BooksRepo} from './infrastructure/BooksRepo'
+import {type File, User} from './domain/BlogModel'
+import {BlogMenu} from './ui/menu/BlogMenu'
+import {Editor} from './ui/editor/Editor'
+import {StoreService} from './infrastructure/StoreService'
 import {RestApi} from './infrastructure/backend/RestApi'
 import {GlobalContext} from '../global/GlobalContext'
 import {observe} from '../lib/rx/RXObserver'
 
 export class BlogContext {
   readonly user: User
-  readonly authorsUID: string[]
+  readonly directoriesUID: string[]
   readonly blogMenu: BlogMenu
   readonly editor: Editor
   readonly restApi: RestApi
-  readonly repo: BooksRepo
+  readonly storeService: StoreService
 
   static self: BlogContext
 
   static init() {
     if (BlogContext.self === undefined) {
       BlogContext.self = new BlogContext()
+      BlogContext.self.subscribeToBrowserLocation()
     }
     return BlogContext.self
   }
 
   private constructor() {
-    this.authorsUID = []
-    this.restApi = new RestApi(GlobalContext.self.app)
+    this.directoriesUID = []
+    this.restApi = new RestApi()
     this.user = new User(this.restApi)
     this.blogMenu = new BlogMenu()
     this.editor = new Editor(this.user)
-    this.repo = new BooksRepo(this.restApi)
-    this.subscribeToBrowserLocation()
-    this.loadAuthorList()
+    this.storeService = new StoreService(this.restApi)
   }
 
   private subscribeToBrowserLocation() {
@@ -43,54 +41,62 @@ export class BlogContext {
       .subscribe()
   }
 
-  private loadAuthorList() {
-    this.restApi.loadAllAuthors().pipe()
-      .onReceive(res => {
-        this.user.authors = res
-        this.parseBrowserLocation()
-      })
-      .subscribe()
-  }
-
   private parseBrowserLocation() {
-    const path = document.location.pathname //'/repo/authorId/bookId#hash'
-    const vv = path.split(/[/\#]/) //[ '', 'repo', 'authorId', 'bookId', 'hash' ]
-    const selectedAuthor = vv.length > 2 ? this.user.findAuthor(a => a.id === vv[2]) : undefined
-    const selectedBook = selectedAuthor && vv.length > 3 ? selectedAuthor.findBook(b => b.id === vv[3]) : undefined
-    const selectedChapter = selectedBook ? document.location.hash : ''
-    console.log('User:updateSelection, path:', path, ', authors:', this.user.authors.length, ', selectedAuthor:', selectedAuthor?.id, ', books:', selectedAuthor?.books.length)
+    const path = document.location.pathname //'/directoryId/fileId#hash'
+    const selectedChapter = document.location.hash //hash
+    const vv = path.split(/[/\#]/) //[ 'repo', 'directoryId', 'fileId', 'hash' ]
 
-    if (selectedAuthor && !selectedAuthor.booksLoaded) {
-      this.restApi.loadAllBooks(selectedAuthor).pipe()
-        .onReceive(res => {
-          selectedAuthor.booksLoaded = true
-          selectedAuthor.books = res
-          this.parseBrowserLocation()
-        })
+    if (vv[vv.length - 1] === selectedChapter) {
+      vv.pop()
     }
 
-    this.user.selectedAuthor = selectedAuthor
-    this.user.selectedBook = selectedBook
+    let selectedFile: File = this.user.repo
+    while (vv.length > 0) {
+      const id = vv.shift()
+      const files: File[] = selectedFile?.children ?? []
+      for (let i = 0; i < files.length; i++) {
+        if (files[i].id === id) {
+          selectedFile = files[i]
+          break
+        }
+      }
+
+      if (selectedFile.isDirectory) {
+        if (!selectedFile.filesLoaded) {
+          selectedFile.loadChildrenFiles().pipe()
+            .onComplete(() => {
+              this.parseBrowserLocation()
+            })
+            .subscribe()
+          break
+        }
+      } else {
+        break
+      }
+    }
+    console.log('BlogContext:parseBrowserLocation, path:', path, ', root children:', this.user.repo.children.length, ', selectedFle:', selectedFile)
+
+    this.user.selectedFile = selectedFile
     this.user.selectedChapter = selectedChapter
   }
 }
 
 export function observeEditor(): Editor {
-  return observe(useBlogContext().editor)
+  return observe(BlogContext.self.editor)
 }
 
-export function observeRepo(): BooksRepo {
-  return observe(useBlogContext().repo)
+export function observeStoreService(): StoreService {
+  return observe(BlogContext.self.storeService)
 }
 
 export function observeApi(): RestApi {
-  return observe(useBlogContext().restApi)
+  return observe(BlogContext.self.restApi)
 }
 
 export function observeUser(): User {
-  return observe(useBlogContext().user)
+  return observe(BlogContext.self.user)
 }
 
 export function observeBlogMenu(): BlogMenu {
-  return observe(useBlogContext().blogMenu)
+  return observe(BlogContext.self.blogMenu)
 }

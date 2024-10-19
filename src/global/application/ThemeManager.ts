@@ -19,6 +19,7 @@ export interface GlobalTheme {
   red: string
   gray: string
   green: string
+  mark: string
   blue: string
   pink: string
   purple: string
@@ -32,6 +33,7 @@ export interface GlobalTheme {
   menuSelectedItem: string
   maxBlogTextWidth: string
   maxBlogTextWidthPx: number
+  menuWidthPx: number
 }
 
 export class ThemeManager extends RXObservableEntity<ThemeManager> {
@@ -96,13 +98,13 @@ export class ThemeManager extends RXObservableEntity<ThemeManager> {
   * */
 
   createLightTheme(): GlobalTheme {
-    const black = '#151a1c'
-    const white = '#f5f6f7'
-    const red = '#b4466d'
+    const black = '#111111'
+    const white = '#efeee8'//e9eeef
+    const red = '#93324f'
     return {
       id: 'light',
       isLight: true,
-      defFontSize: '1.25rem',
+      defFontSize: '1.5rem',
       defFontWeight: '400',
       appBg: white,
       white,
@@ -115,6 +117,7 @@ export class ThemeManager extends RXObservableEntity<ThemeManager> {
       red,
       gray: '#8a9fb6',
       green: '#7198a9',
+      mark: '#a7e0b9',
       blue: '#084891',
       pink: '#c7accc',
       purple: '#d5caf2',
@@ -123,11 +126,12 @@ export class ThemeManager extends RXObservableEntity<ThemeManager> {
       selectedBlockBg: black + '10',
       modalViewBg: '#e5d8f1',
       transparent: '#00000000',
-      menuItem: black + '88',
+      menuItem: black + 'aa',
       menuHoveredItem: red,
       menuSelectedItem: black,
       maxBlogTextWidth: '950px',
-      maxBlogTextWidthPx: 950
+      maxBlogTextWidthPx: 950,
+      menuWidthPx: 500
     }
   }
 
@@ -138,28 +142,29 @@ export class ThemeManager extends RXObservableEntity<ThemeManager> {
   * */
 
   createDarkTheme(t: GlobalTheme): GlobalTheme {
-    const text = '#a3adbb' //abc3d0
+    const text = '#aab6c2' //aab6c2
     const white = '#c6d4e3'
     const red = '#df5f83'
     return Object.assign({}, t, {
       id: 'dark',
       isLight: false,
-      appBg: '#1f2024', //1b1c21
+      appBg: '#262730', //131417 262730
       white,
       header: white,
       text,
       text50: text + '88',
-      editorText: '#a99aa3',
+      editorText: '#9a9696',
       red,
       gray: '#79848d',
       green: '#6c8f9f',
+      mark: '#bbd09e',
       border: '#ffFFff10',
       blue: '#5e98de',
       violet: '#aeadde',
-      purple: '#ada7d3',
-      quote: '#7fa3bf',
+      purple: '#b2aee5',
+      quote: '#9f8cb1',
       pink: '#c293cc',
-      orange: '#84662f',
+      orange: '#463d16',
       selectedBlockBg: text + '10',
       modalViewBg: '#43354b',
       menuItem: text + '88',
@@ -182,7 +187,7 @@ export class ThemeManager extends RXObservableEntity<ThemeManager> {
       fontFamily: articleFont,
       textTransform: 'uppercase',
       fontSize: '2.5rem',
-      fontWeight: '700',
+      fontWeight: 'bold',
       textColor: textHeaderColor
     }
     buildRule(h1Props, parentSelector, 'h1')
@@ -190,26 +195,27 @@ export class ThemeManager extends RXObservableEntity<ThemeManager> {
     const h2Props: StylableComponentProps = {
       fontFamily: articleFont,
       fontSize: '1.75rem',
-      fontWeight: '600',
-      paddingVertical: '20px',
+      fontWeight: 'bold',
+      paddingTop: '50px',
+      paddingBottom: '20px',
       textColor: textHeaderColor
     }
     buildRule(h2Props, parentSelector, 'h2')
 
     const h3Props: StylableComponentProps = {
       fontFamily: articleFont,
-      fontSize: '1.25rem',
-      fontWeight: '600',
-      textAlign: 'center',
+      fontSize: t.defFontSize,
+      fontWeight: 'bold',
+      textAlign: 'left',
       textColor: textHeaderColor
     }
     buildRule(h3Props, parentSelector, 'h3')
 
     const h4Props: StylableComponentProps = {
       fontFamily: articleFont,
-      fontSize: '1.25rem',
-      fontWeight: '600',
-      textAlign: 'right',
+      fontSize: t.defFontSize,
+      fontWeight: 'bold',
+      textAlign: 'left',
       textColor: textHeaderColor
     }
     buildRule(h4Props, parentSelector, 'h4')
@@ -217,7 +223,7 @@ export class ThemeManager extends RXObservableEntity<ThemeManager> {
     const h5Props: StylableComponentProps = {
       fontFamily: articleFont,
       fontSize: t.defFontSize,
-      fontWeight: '600',
+      fontWeight: 'bold',
       textColor
     }
     buildRule(h5Props, parentSelector, 'h5')
@@ -234,6 +240,8 @@ export class ThemeManager extends RXObservableEntity<ThemeManager> {
       fontFamily: articleFont,
       fontSize: t.defFontSize,
       fontWeight: t.defFontWeight,
+      //textIndent: '2rem',
+      paddingTop: t.defFontSize,
       textColor
     }
     buildRule(pProps, parentSelector, 'p')
@@ -241,7 +249,7 @@ export class ThemeManager extends RXObservableEntity<ThemeManager> {
     const boldProps: StylableComponentProps = {
       fontFamily: articleFont,
       fontSize: t.defFontSize,
-      fontWeight: t.isLight ? '600' : t.defFontWeight,
+      fontWeight: t.isLight ? 'bold' : t.defFontWeight,
       textColor: t.isLight ? textColor : t.header
     }
     buildRule(boldProps, parentSelector, 'strong')
@@ -253,17 +261,22 @@ export class ThemeManager extends RXObservableEntity<ThemeManager> {
       fontWeight: t.defFontWeight,
       textColor
     }
-    buildRule(globalProps, parentSelector, 'span')
     buildRule(globalProps, parentSelector, 'div')
-    buildRule(globalProps, parentSelector, 'i')
+    buildRule(globalProps, parentSelector, 'span')
+
     buildRule(globalProps, parentSelector, 'li')
+
+    globalProps.fontStyle = 'italic'
+    globalProps.fontWeight = undefined
+    buildRule(globalProps, parentSelector, 'i')
+    buildRule(globalProps, parentSelector, 'em')
 
     //we are using this rule as selection
     const codeProps: StylableComponentProps = {
       fontFamily: articleFont,
       fontSize: t.defFontSize,
-      bgColor: t.isLight ? t.purple : undefined,
-      textColor: t.isLight ? textColor : t.purple,
+      bgColor: t.mark,
+      textColor: t.isLight ? textColor : t.black,
       paddingVertical: '5px'
     }
     buildRule(codeProps, parentSelector, 'code')
@@ -295,21 +308,24 @@ export class ThemeManager extends RXObservableEntity<ThemeManager> {
     buildRule(linkProps, parentSelector, 'a:hover')
 
     const blockquoteContentProps: StylableComponentProps = {
-      paddingVertical: '20px'
+      paddingVertical: '10px',
+      paddingLeft: '60px',
+      borderLeft: '1px solid ' + t.quote
     }
     buildRule(blockquoteContentProps, parentSelector, 'blockquote')
 
     const blockquoteTextProps: StylableComponentProps = {
+      fontFamily: articleFont,
       fontSize: t.defFontSize,
-      textAlign: 'left',
-      textColor: t.quote
+      fontStyle: 'italic',
+      textColor
     }
     buildRule(blockquoteTextProps, parentSelector, 'blockquote p')
 
     const blockquoteAuthorProps: StylableComponentProps = {
+      fontFamily: articleFont,
       fontSize: t.defFontSize,
-      textAlign: 'right',
-      textColor: t.quote
+      textColor
     }
     buildRule(blockquoteAuthorProps, parentSelector, 'blockquote h4')
 

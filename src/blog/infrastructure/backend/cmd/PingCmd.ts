@@ -1,7 +1,7 @@
 import {type RestApi, type RestApiError, type Runnable} from '../RestApi'
 import {type RXObservable, RXOperation} from '../../../../lib/rx/RXPublisher'
 
-export class CheckServerCmd implements Runnable {
+export class PingCmd implements Runnable {
   private readonly api: RestApi
 
   constructor(api: RestApi) {

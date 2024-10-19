@@ -1,8 +1,8 @@
 :root {
   --LineHeight: 1.6;
-  --font-family: -apple-system,"system-ui", -apple-system, "system-ui", sans-serif;
+  --font-family: -apple-system,"system-ui", "system-ui", sans-serif;
   --font-family-mono: Menlo, source-code-pro, Monaco, 'Courier New', monospace;
-  --font-family-article: 'verdana';
+  --font-family-article: 'verdana', 'georgia', 'pragmatica';
 }
 
 @font-face {
@@ -29,6 +29,56 @@
   font-display: block;
 }
 
+@font-face {
+  font-family: 'georgia';
+  src: url('resources/fonts/georgia.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'georgia';
+  src: url('resources/fonts/georgiab.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'georgia';
+  src: url('resources/fonts/georgiai.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+  font-display: block;
+}
+
+/*Pragmatica*/
+
+@font-face {
+  font-family: 'pragmatica';
+  src: url('resources/fonts/Pragmatica.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'pragmatica';
+  src: url('resources/fonts/Pragmatica-Bold.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'pragmatica';
+  src: url('resources/fonts/Pragmatica-Kursiv.otf') format('opentype');
+  font-weight: normal;
+  font-style: italic;
+  font-display: block;
+}
+
 .def {
   font-family: var(--font-family) !important;
 }
@@ -50,7 +100,8 @@
 html {
   color-scheme: dark;
   scroll-behavior: auto;
-  font-size: 18px;
+  font-size: 16px;
+  text-size-adjust: 100%;
   line-height: var(--LineHeight);
   justify-content: space-between;
   font-family: var(--font-family) !important;
@@ -60,7 +111,7 @@ html {
 
 @media screen and (max-width: 1000px) {
   html {
-    font-size: 16px;
+    font-size: 15px;
   }
 }
 
@@ -153,6 +204,11 @@ a:hover {
 
 .rtl {
   direction: rtl;
+  overflow: auto;
+}
+
+.ltr {
+  direction: ltr;
 }
 
 .listScrollbar {
@@ -169,12 +225,12 @@ a:hover {
 }
 
 .listScrollbar::-webkit-scrollbar-thumb {
-  background: #88888888;
+  background: #555555;
   background-clip: content-box;
 }
 
 .listScrollbar::-webkit-scrollbar-thumb:hover {
-  background: #888888;
+  background: #666666;
   background-clip: content-box;
 }
 
@@ -415,49 +471,30 @@ button {
 }
 
 .icon-film:before {
-  content: "\e915";
+  content: "\e90c";
   font-size: 5rem;
 }
 
 .icon-settings:before {
-  content: "\e911";
+  content: "\e902";
 }
 
 .icon-link:before {
   font-size: 0.5rem;
-  content: "\e912";
-}
-
-.icon-back:before {
-  font-size: 0.7rem;
-  content: "\e913";
-}
-
-.icon-quote:before {
-  font-size: 1.5rem;
-  content: "\e914";
-}
-
-.icon-download:before {
-  content: "\e90e";
-}
-
-.icon-doc:before {
-  font-size: 0.7rem;
-  content: "\e90d";
+  content: "\e909";
 }
 
 .icon-moon:before {
   font-size: 1.25rem;
-  content: "\e90b";
+  content: "\e90a";
 }
 
 .icon-sun:before {
-  content: "\e90c";
+  content: "\e90b";
 }
 
 .icon-down:before {
-  content: "\e901";
+  content: "\e903";
 }
 
 .icon-up:before {
@@ -466,35 +503,15 @@ button {
 
 .icon-scrollBack:before {
   font-size: 1.25rem;
-  content: "\e908";
-}
-
-.icon-nextPage:before {
-  font-size: 0.9rem;
-  content: "\e909";
-}
-
-.icon-next:before {
-  font-size: 1rem;
-  content: "\e90f";
-}
-
-.icon-prev:before {
-  font-size: 1rem;
-  content: "\e910";
-}
-
-.icon-prevPage:before {
-  font-size: 0.9rem;
-  content: "\e90a";
+  content: "\e90d";
 }
 
 .icon-close:before {
-  content: "\e907";
+  content: "\e90e";
 }
 
 .icon-menu:before {
-  content: "\e905";
+  content: "\e901";
 }
 
 .icon-plus:before {
@@ -506,9 +523,14 @@ button {
 }
 
 .icon-edit:before {
-  content: "\e902";
+  content: "\e905";
 }
 
 .icon-search:before {
-  content: "\e903";
+  content: "\e907";
+}
+
+.icon-folder:before {
+  font-size: 0.7rem;
+  content: "\e908";
 }

@@ -1,7 +1,9 @@
 import {generateUID, type UID} from '../../global/domain/UIDGenerator'
 import {BlogContext} from '../BlogContext'
-import {type RestApi} from '../infrastructure/backend/RestApi'
-import {RXObservableEntity} from '../../lib/rx/RXPublisher'
+import {type RestApi, type RestApiError} from '../infrastructure/backend/RestApi'
+import {type RXObservable, RXObservableEntity} from '../../lib/rx/RXPublisher'
+import {sortByKeys} from '../../global/ui/Utils'
+import {GlobalContext} from '../../global/GlobalContext'
 
 interface Serializable {
   serialize: () => string
@@ -18,35 +20,27 @@ interface Serializable {
 export class User extends RXObservableEntity<User> {
   readonly uid: UID
   readonly restApi: RestApi
+  readonly repo: File
 
   constructor(restApi: RestApi) {
     super()
     this.uid = generateUID()
     this.restApi = restApi
+    this.repo = new File()
+    this.repo.deserialize({'isDirectory': 'true', 'text': 'ID\nrepo\n\nNAME\nrepo'})
     console.log('new User')
     console.log('cur location:', document.location)
   }
 
   //--------------------------------------
-  //  selectedAuthor
+  //  selectedFile
   //--------------------------------------
-  private _selectedAuthor: Author | undefined = undefined
-  get selectedAuthor(): Author | undefined { return this._selectedAuthor }
-  set selectedAuthor(value: Author | undefined) {
-    if (this._selectedAuthor !== value) {
-      this._selectedAuthor = value
-      this.mutated()
-    }
-  }
-
-  //--------------------------------------
-  //  selectedBook
-  //--------------------------------------
-  private _selectedBook: Book | undefined = undefined
-  get selectedBook(): Book | undefined { return this._selectedBook }
-  set selectedBook(value: Book | undefined) {
-    if (this._selectedBook !== value) {
-      this._selectedBook = value
+  private _selectedFile: File | undefined = undefined
+  get selectedFile(): File | undefined { return this._selectedFile }
+  set selectedFile(value: File | undefined) {
+    if (this._selectedFile !== value) {
+      this._selectedFile && (this._selectedFile.isEditing = false)
+      this._selectedFile = value
       this.mutated()
     }
   }
@@ -63,24 +57,8 @@ export class User extends RXObservableEntity<User> {
     }
   }
 
-  //--------------------------------------
-  //  authors
-  //--------------------------------------
-  private _authors = Array<Author>()
-  get authors(): Author[] { return this._authors }
-  set authors(value: Author[]) {
-    if (this._authors !== value) {
-      this._authors = value.sort(sortByKey('shortName'))
-      this.mutated()
-    }
-  }
-
-  findAuthor(predicate: (a: Author) => boolean): Author | undefined {
-    return this.authors.find(predicate)
-  }
-
-  add(a: Author) {
-    this.authors.push(a)
+  add(f: File) {
+    this.repo.children.push(f)
     this.mutated()
   }
 }
@@ -93,125 +71,215 @@ export class User extends RXObservableEntity<User> {
 *
 * */
 
-export const AUTHOR_KEY_NAME = 'NAME'
-export const AUTHOR_KEY_BIOGRAPHY = 'BIOGRAPHY'
-export const AUTHOR_KEY_BIRTH_YEAR = 'BIRTH_YEAR'
-export const AUTHOR_KEY_DEATH_YEAR = 'DEATH_YEAR'
-export const AUTHOR_KEY_PHOTO = 'PHOTO'
+export const INFO_KEY_ID = 'ID'
+export const INFO_KEY_NAME = 'NAME'
+export const INFO_KEY_COVER = 'COVER'
+export const INFO_KEY_YEAR = 'YEAR'
+export const INFO_KEY_GENRE = 'GENRE'
+export const INFO_KEY_PHOTO = 'PHOTO'
+export const INFO_KEY_ABOUT = 'ABOUT'
+export const INFO_KEY_MARKDOWN = 'MARKDOWN'
+export const INFO_IS_AUTHOR = 'IS_AUTHOR'
+export const INFO_AUTHOR_BIRTH_YEAR = 'BIRTH_YEAR'
+export const INFO_AUTHOR_DEATH_YEAR = 'DEATH_YEAR'
 
-export class Author extends RXObservableEntity<Author> {
-  readonly id: string
-  readonly link: string
-  readonly shortName: string
-  readonly photoUrl: string = ''
-  readonly fullName: string = ''
-  readonly biography: string = ''
-  readonly birthYear: string = ''
-  readonly deathYear: string = ''
+export class File extends RXObservableEntity<File> {
+  uid = generateUID()
+  id = ''
+  info: InfoPage
+  isDamaged = false
+  isDirectory = false
+  parent: File | undefined = undefined
 
-  constructor(id: string, params: any) {
+  get name(): string { return this.info.name }
+  get isAuthor(): boolean { return this.info.author !== undefined }
+  get link(): string { return this.parent ? this.parent.link + '/' + this.id : this.id }
+
+  constructor() {
     super()
-    this.id = id
-    this.shortName = id
-    this.link = '/' + id
-    this.photoUrl = params[AUTHOR_KEY_PHOTO] ? BlogContext.self.restApi.assetsUrl + params[AUTHOR_KEY_PHOTO] : ''
-    this.fullName = params[AUTHOR_KEY_NAME]
-    const [surName, ...rest] = this.fullName.split(' ')
-    this.shortName = rest.length > 0 ? surName + ' ' + rest.map(v => v.charAt(0).toLocaleUpperCase() + '.').join('') : surName
-    this.biography = params[AUTHOR_KEY_BIOGRAPHY]
-    this.birthYear = params[AUTHOR_KEY_BIRTH_YEAR]
-    this.deathYear = params[AUTHOR_KEY_DEATH_YEAR]
+    this.info = new InfoPage(this, '')
+    this._pages = []
   }
 
-  //--------------------------------------
-  //  booksLoaded
-  //--------------------------------------
-  private _booksLoaded: boolean = false
-  get booksLoaded(): boolean { return this._booksLoaded }
-  set booksLoaded(value: boolean) {
-    if (this._booksLoaded !== value) {
-      this._booksLoaded = value
-      this.mutated()
+  deserialize(data: any) {
+    try {
+      console.log('File: ' + data?.path + ', isDir:', data.isDirectory)
+      if (data.text && data.isDirectory !== undefined) {
+        this.isDamaged = false
+        this.isDirectory = data.isDirectory
+        const sepIndex = data.text.indexOf(INFO_KEY_MARKDOWN)
+        const infoText = sepIndex === -1 ? data.text : data.text.substring(0, sepIndex).replace(/[\n| ]+$/, '')
+        this.info.deserialize(infoText)
+        this.id = this.info.id
+        const markdown = sepIndex === -1 ? '' : data.text.substring(sepIndex + INFO_KEY_MARKDOWN.length + 1)
+        this._pages = markdown ? markdown.split('\n\n\n').map((text: string) => new Page(this, text)) : []
+      } else {
+        console.log('File:deserialize, isDamaged, data:', data)
+        this.isDamaged = true
+      }
+    } catch (e: any) {
+      console.log('File:deserialize, err:', e.message, 'data:', data)
     }
   }
 
-  //--------------------------------------
-  //  books
-  //--------------------------------------
-  private _books: Book[] = []
-  get books(): Book[] { return this._books }
-  set books(value: Book[]) {
-    if (this._books !== value) {
-      this._books = value
-      this.mutated()
+  serialize(): any {
+    let text = this.info.serialize()
+    if (this.pages.length > 0) {
+      text += '\n\n' + INFO_KEY_MARKDOWN + '\n'
+      text += this.pages.map(p => p.serialize()).filter(p => p !== '').join('\n\n\n')
     }
+    return {id: this.info.id, text}
   }
 
-  findBook(predicate: (b: Book) => boolean): Book | undefined {
-    return this.books.find(predicate)
-  }
-
-  static compare = (a: Author, b: Author) => {
-    if (a.fullName > b.fullName) return -1
-    if (a.fullName < b.fullName) return 1
+  static compare = (a: File, b: File) => {
+    if (a.info.year > b.info.year) return -1
+    if (a.info.year < b.info.year) return 1
     return 0
   }
-}
 
-/*
-*
-*
-* DOMAIN ENTITY
-*
-*
-* */
+  //--------------------------------------
+  //  isEditing
+  //--------------------------------------
+  private _isEditing: boolean = false
+  get isEditing(): boolean { return this._isEditing }
+  set isEditing(value: boolean) {
+    if (this._isEditing !== value) {
+      this._isEditing = value
+      this.mutated()
+    }
+  }
 
-export const BOOK_KEY_TITLE = 'TITLE'
-export const BOOK_KEY_COVER = 'COVER'
-export const BOOK_KEY_YEAR = 'YEAR'
-export const BOOK_KEY_GENRE = 'GENRE'
-export const BOOK_KEY_ABOUT = 'ABOUT'
-export const BOOK_KEY_MARKDOWN = 'MARKDOWN'
+  //--------------------------------------
+  //  filesLoaded
+  //--------------------------------------
+  private _filesLoaded: boolean = false
+  get filesLoaded(): boolean { return this._filesLoaded }
+  set filesLoaded(value: boolean) {
+    if (this._filesLoaded !== value) {
+      this._filesLoaded = value
+      this.mutated()
+    }
+  }
 
-export class Book extends RXObservableEntity<Book> {
-  readonly id: string
-  readonly author: Author
-  readonly title: string
-  readonly cover: string
-  readonly link: string
-  readonly year: string
-  readonly genre: 'movie' | 'philosophy' | 'literature'
-  readonly about: string
+  //--------------------------------------
+  //  children
+  //--------------------------------------
+  private _children: File[] = []
+  get children(): File[] { return this._children }
+  set children(value: File[]) {
+    if (this._children !== value) {
+      this._children = value.sort(sortByKeys(['isDirectory', 'isAuthor', 'name'], [false, true]))
+      this._children.forEach(f => f.parent = this)
+      this.parent?.mutated()
+      this.mutated()
+    }
+  }
+
+  //--------------------------------------
+  //  pages
+  //--------------------------------------
   private _pages: Page[]
   get pages(): Page[] { return this._pages }
 
-  constructor(id: string, author: Author, markdown: string, params: any) {
-    super()
-    this.id = id
-    this.author = author
-    this.link = '/repo/' + author.id + '/' + params[BOOK_KEY_TITLE]
-    this.title = params[BOOK_KEY_TITLE]
-    this.cover = params[BOOK_KEY_COVER]
-    this.year = params[BOOK_KEY_YEAR]
-    this.genre = params[BOOK_KEY_GENRE]
-    this.about = params[BOOK_KEY_ABOUT] ?? ''
-    this._pages = markdown.split('\n\n\n').map(text => new Page(this, text))
+  //--------------------------------------
+  //  isLoading
+  //--------------------------------------
+  private _isLoading: boolean = false
+  get isLoading(): boolean { return this._isLoading }
+  set isLoading(value: boolean) {
+    if (this._isLoading !== value) {
+      this._isLoading = value
+      this.mutated()
+    }
   }
 
-  static compare = (a: Book, b: Book) => {
-    if (a.year > b.year) return -1
-    if (a.year < b.year) return 1
-    return 0
+  private op: RXObservable<any[], RestApiError> | undefined
+  loadChildrenFiles(): RXObservable<any[], RestApiError> {
+    if (this.op && !this.op.isComplete) return this.op
+    this.op = BlogContext.self.restApi.loadChildrenFiles(this)
+    this.isLoading = true
+
+    this.op.pipe()
+      .onReceive((files: any) => {
+        console.log('File:loadChildrenFiles:onReceive, files count:', files.length)
+
+        this.children = files.map((data: any) => {
+          const f = new File()
+          f.deserialize(data)
+          return f
+        })
+          .filter((f: File) => !f.isDamaged)
+        console.log('----after parsing:', this.children)
+      })
+      .onComplete(() => {
+        this.filesLoaded = true
+        this.isLoading = false
+      })
+      .subscribe()
+
+    return this.op
   }
 
-  //--------------------------------------
-  //  isStoring
-  //--------------------------------------
-  private _isStoring: boolean = false
-  get isStoring(): boolean { return this._isStoring }
-  set isStoring(value: boolean) {
-    if (this._isStoring !== value) {
-      this._isStoring = value
+  createAndAddFile(): File | undefined {
+    if (!this.isDirectory) return undefined
+
+    const id = generateUID()
+    let text = INFO_KEY_ID + '\n' + id + '\n\n'
+    text += INFO_KEY_NAME + '\n' + id + '\n\n'
+    text += INFO_KEY_GENRE + '\n' + 'philosophy | literature | movie | science | art\n\n'
+    text += INFO_KEY_YEAR + '\n' + (new Date()).getFullYear() + '\n\n'
+    text += INFO_KEY_ABOUT + '\n' + 'Description'
+
+    const res = new File()
+    res.deserialize({'isDirectory': false, text})
+    this.addFile(res)
+    const rx = BlogContext.self.restApi.storeFile(res)
+    rx.pipe()
+      .onError(e => {
+        this.removeFile(res)
+        GlobalContext.self.app.errorMsg = e.message
+      })
+      .subscribe()
+    return res
+  }
+
+  createAndAddDirectory(): File | undefined {
+    if (!this.isDirectory) return undefined
+
+    const id = generateUID()
+    let text = INFO_KEY_ID + '\n' + id + '\n\n'
+    text += INFO_KEY_NAME + '\n' + id + '\n\n'
+    text += INFO_IS_AUTHOR + '\nfalse\n\n'
+    text += INFO_AUTHOR_BIRTH_YEAR + '\n1900\n\n'
+    text += INFO_AUTHOR_DEATH_YEAR + '\n2000'
+
+    const res = new File()
+    res._filesLoaded = true
+    res.deserialize({'isDirectory': true, text})
+    this.addFile(res)
+    const rx = BlogContext.self.restApi.storeFile(res)
+    rx.pipe()
+      .onError(e => {
+        this.removeFile(res)
+        GlobalContext.self.app.errorMsg = e.message
+      })
+      .subscribe()
+    return res
+  }
+
+  removeFile(f: File) {
+    const ind = this.children.indexOf(f)
+    if (ind !== -1) {
+      this.children.splice(ind, 1)
+      this.mutated()
+    }
+  }
+
+  addFile(f: File) {
+    if (this.isDirectory) {
+      this.children.push(f)
+      f.parent = this
+      this.mutated()
     }
   }
 
@@ -230,6 +298,7 @@ export class Book extends RXObservableEntity<Book> {
   }
 
   movePageUp(page: Page): boolean {
+    if (page === this.info) return false
     const pageInd = this.pages.findIndex(p => p.uid === page.uid)
     if (pageInd !== -1 && pageInd !== 0) {
       this.pages[pageInd] = this.pages[pageInd - 1]
@@ -242,6 +311,7 @@ export class Book extends RXObservableEntity<Book> {
   }
 
   movePageDown(page: Page): boolean {
+    if (page === this.info) return false
     const pageInd = this.pages.findIndex(p => p.uid === page.uid)
     if (pageInd !== -1 && pageInd < this.pages.length - 1) {
       this.pages[pageInd] = this.pages[pageInd + 1]
@@ -254,6 +324,7 @@ export class Book extends RXObservableEntity<Book> {
   }
 
   remove(page: Page): boolean {
+    if (page === this.info) return false
     const pageInd = this.pages.findIndex(p => p.uid === page.uid)
     if (pageInd !== -1) {
       this.pages.splice(pageInd, 1)
@@ -266,22 +337,7 @@ export class Book extends RXObservableEntity<Book> {
   }
 
   private store() {
-    BlogContext.self.repo.addToStoreQueue(this)
-  }
-
-  serialize(): string {
-    const END = '\n\n'
-    let res = ''
-    if (this.title) res += BOOK_KEY_TITLE + '\n' + this.title + END
-    if (this.genre) res += BOOK_KEY_GENRE + '\n' + this.genre + END
-    if (this.about) res += BOOK_KEY_ABOUT + '\n' + this.about + END
-    if (this.year) res += BOOK_KEY_YEAR + '\n' + this.year + END
-    if (this.cover) res += BOOK_KEY_COVER + '\n' + this.cover + END
-    if (this.pages.length > 0) {
-      res += BOOK_KEY_MARKDOWN + '\n'
-      res += this.pages.map(p => p.serialize()).filter(p => p !== '').join('\n\n\n')
-    }
-    return res
+    BlogContext.self.storeService.addToStoreQueue(this)
   }
 
   dispose() {
@@ -293,28 +349,63 @@ export class Book extends RXObservableEntity<Book> {
   }
 }
 
+/*
+*
+*
+* DOMAIN ENTITY
+*
+*
+* */
+
 export class Page extends RXObservableEntity<Page> implements Serializable {
   readonly uid = generateUID()
-  readonly book: Book
+  readonly file: File
 
-  constructor(book: Book, text: string) {
+  constructor(file: File, text: string) {
     super()
-    this.book = book
+    this.file = file
     this._text = text
   }
 
   //--------------------------------------
+  //  movable
+  //--------------------------------------
+  protected _movable = true
+  get movable(): boolean { return this._movable }
+
+  //--------------------------------------
+  //  removable
+  //--------------------------------------
+  protected _removable = true
+  get removable(): boolean { return this._removable }
+
+  //--------------------------------------
   //  text
   //--------------------------------------
-  private _text: string = ''
+  protected _text: string = ''
   get text(): string { return this._text }
   set text(value: string) {
     if (this._text !== value) {
       this._text = value
       this.mutated()
-      BlogContext.self.repo.addToStoreQueue(this.book)
+      this.textDidChange()
+      BlogContext.self.storeService.addToStoreQueue(this.file)
     }
   }
+
+  //--------------------------------------
+  //  isSelected
+  //--------------------------------------
+  private _isSelected: boolean = false
+  get isSelected(): boolean { return this._isSelected }
+  set isSelected(value: boolean) {
+    if (this._isSelected !== value) {
+      this._isSelected = value
+      this.mutated()
+    }
+  }
+
+  protected textDidChange() {}
 
   serialize(): string {
     return this._text
@@ -325,10 +416,132 @@ export class Page extends RXObservableEntity<Page> implements Serializable {
   }
 }
 
-const sortByKey = (key: string) => {
-  return (a: any, b: any) => {
-    if (a[key] < b[key]) return -1
-    if (a[key] > b[key]) return 1
-    return 0
+/*
+*
+*
+* DOMAIN ENTITY
+*
+*
+* */
+
+export class InfoPage extends Page {
+  constructor(file: File, text: string) {
+    super(file, text)
+    this.deserialize(text)
+    this._movable = false
+    this._removable = false
+  }
+
+  protected override textDidChange() {
+    this.deserialize(this.text)
+  }
+
+  //--------------------------------------
+  //  id
+  //--------------------------------------
+  private _id: string = ''
+  get id(): string { return this._id }
+
+  //--------------------------------------
+  //  name
+  //--------------------------------------
+  private _name: string = ''
+  get name(): string { return this._name }
+
+  //--------------------------------------
+  //  year
+  //--------------------------------------
+  private _year: string = ''
+  get year(): string { return this._year }
+
+  //--------------------------------------
+  //  genre: movie | philosophy | literature | science | art
+  //--------------------------------------
+  private _genre: string = ''
+  get genre(): string { return this._genre }
+
+  //--------------------------------------
+  //  about
+  //--------------------------------------
+  private _about: string = ''
+  get about(): string { return this._about }
+
+  //--------------------------------------
+  //  photo
+  //--------------------------------------
+  private _photo: string = ''
+  get photo(): string { return this._photo }
+
+  //--------------------------------------
+  //  cover
+  //--------------------------------------
+  private _cover: string = ''
+  get cover(): string { return this._cover }
+
+  //--------------------------------------
+  //  author
+  //--------------------------------------
+  private _author: Author | undefined = undefined
+  get author(): Author | undefined { return this._author }
+
+  deserialize(text: string) {
+    const keyValues = text.split('\n\n')
+    this._text = text
+    let isAuthor = false
+    let authorBirthYear = ''
+    let authorDeathYear = ''
+
+    for (let i = 0; i < keyValues.length; i++) {
+      const keyValue = keyValues[i]
+      const sepIndex = keyValue.indexOf('\n')
+      const key = sepIndex === -1 ? keyValue : keyValue.substring(0, sepIndex)
+      const value = sepIndex === -1 ? '' : keyValue.substring(sepIndex + 1)
+
+      if (!key) continue
+
+      if (key === INFO_KEY_ID) {
+        this._id = value
+      } else if (key === INFO_KEY_NAME) {
+        this._name = value
+      } else if (key === INFO_IS_AUTHOR) {
+        isAuthor = value.toLowerCase() === 'true'
+      } else if (key === INFO_AUTHOR_BIRTH_YEAR) {
+        authorBirthYear = value
+      } else if (key === INFO_AUTHOR_DEATH_YEAR) {
+        authorDeathYear = value
+      } else if (key === INFO_KEY_COVER) {
+        this._cover = value
+      } else if (key === INFO_KEY_YEAR) {
+        this._year = value
+      } else if (key === INFO_KEY_PHOTO) {
+        this._photo = value
+      } else if (key === INFO_KEY_ABOUT) {
+        this._about = value
+      } else if (key === INFO_KEY_GENRE) {
+        this._genre = value
+      } else {
+        console.warn('InfoPage:deserialize, unknown tag:', key, ', keyValues:')
+        console.warn(keyValues)
+      }
+    }
+
+    this._author = isAuthor ? new Author(this.name, authorBirthYear, authorDeathYear) : undefined
+
+    if (this._name === '') this._name = 'Title'
+  }
+}
+
+export class Author {
+  readonly birthYear: string
+  readonly deathYear: string
+  readonly fullName: string
+  readonly shortName: string
+
+  constructor(name: string, birthYear: string, deathYear: string) {
+    this.fullName = name
+    const [surName, ...rest] = name.split(' ')
+    this.shortName = rest.length > 0 ? surName + ' ' + rest.map(v => v.charAt(0).toLocaleUpperCase() + '.').join('') : surName
+    this.birthYear = birthYear
+    this.deathYear = deathYear
   }
 }

@@ -1,5 +1,4 @@
 import {Application} from './application/Application'
-import {useGlobalContext} from '../App'
 import {generateUID} from './domain/UIDGenerator'
 import {observe} from '../lib/rx/RXObserver'
 
@@ -22,5 +21,5 @@ export class GlobalContext {
 }
 
 export function observeApp(): Application {
-  return observe(useGlobalContext().app)
+  return observe(GlobalContext.self.app)
 }

@@ -1,13 +1,14 @@
 import {BrowserRouter, Navigate, Route, Routes} from 'react-router-dom'
 import React, {useLayoutEffect, useState} from 'react'
-import {GlobalContext, observeApp} from './global/GlobalContext'
+import {GlobalContext} from './global/GlobalContext'
 import {observeThemeManager, themeManager} from './global/application/ThemeManager'
 import {BlogContext} from './blog/BlogContext'
 import {BlogPage} from './blog/ui/BlogPage'
 import {IconButton} from './global/ui/Button'
 import {HStack, Label} from 'react-nocss'
 import {LayoutLayer} from './global/application/Application'
-import {observer} from './lib/rx/RXObserver'
+import {observe, observer} from './lib/rx/RXObserver'
+import {MathJaxContext} from 'better-react-mathjax'
 
 export const API_URL = process.env.REACT_APP_API_URL
 export const IS_DEV_MODE = process.env.REACT_APP_MODE === 'development'
@@ -16,34 +17,35 @@ console.log('React v.' + React.version)
 console.log('API_URL:', API_URL)
 console.log('DEV_MODE:', IS_DEV_MODE)
 
-const globalContext = React.createContext(GlobalContext.init())
-export const useGlobalContext = () => React.useContext(globalContext)
+export const globalContext = GlobalContext.init()
 
-const blogContext = React.createContext(BlogContext.init())
-export const useBlogContext = () => React.useContext(blogContext)
+export const blogContext = BlogContext.init()
 
 export const App = observer(() => {
   console.log('new App')
   observeThemeManager()
 
-  return <>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/repo" element={<BlogPage/>}/>
-        <Route path="/repo/:authorId" element={<BlogPage/>}/>
-        <Route path="/repo/:authorId/:bookId" element={<BlogPage/>}/>
-        <Route path="/" element={<Navigate replace to="/repo"/>}/>
-        <Route path="*" element={<Navigate replace to="/"/>}/>
-      </Routes>
-    </BrowserRouter>
-    <ErrorMsgView/>
-  </>
+  return <MathJaxContext config={{
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']]
+    }
+  }}>
+    <>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/*" element={<BlogPage/>}/>
+          <Route path="*" element={<Navigate replace to="/"/>}/>
+        </Routes>
+      </BrowserRouter>
+      <ErrorMsgView/>
+    </>
+  </MathJaxContext>
 })
 
 export const ErrorMsgView = observer(() => {
   console.log('new ErrorMsgView')
 
-  const app = observeApp()
+  const app = observe(globalContext.app)
   const theme = themeManager.theme
 
   const close = () => {
@@ -62,7 +64,7 @@ export const ErrorMsgView = observer(() => {
     width="100%"
     bottom='0'
     minHeight="50px"
-    bgColor={theme.modalViewBg}
+    bgColor={theme.orange}
     layer={LayoutLayer.ERR_MSG}
     position='fixed'>
 

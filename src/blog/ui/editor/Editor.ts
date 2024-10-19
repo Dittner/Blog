@@ -1,7 +1,7 @@
-import {type Page, type User} from '../domain/BlogModel'
+import {type Page, type User} from '../../domain/BlogModel'
 import {type InputProtocol} from 'react-nocss'
-import {BlogContext} from '../BlogContext'
-import {RXObservableEntity} from '../../lib/rx/RXPublisher'
+import {BlogContext} from '../../BlogContext'
+import {RXObservableEntity} from '../../../lib/rx/RXPublisher'
 
 export interface NumberProtocol {
   value: number
@@ -12,19 +12,6 @@ export class Editor extends RXObservableEntity<Editor> {
   private readonly user: User
 
   //--------------------------------------
-  //  editMode
-  //--------------------------------------
-  private _editMode: boolean = false
-  get editMode(): boolean { return this._editMode }
-  set editMode(value: boolean) {
-    if (this._editMode !== value) {
-      this._editMode = value
-      this.selectedPage = undefined
-      this.mutated()
-    }
-  }
-
-  //--------------------------------------
   //  selectedPage
   //--------------------------------------
   private _selectedPage: Page | undefined = undefined
@@ -32,8 +19,11 @@ export class Editor extends RXObservableEntity<Editor> {
   set selectedPage(value: Page | undefined) {
     if (this._selectedPage !== value) {
       this.applyTextChanges()
+      if (this._selectedPage) this._selectedPage.isSelected = false
       this._selectedPage = value
+      if (value) value.isSelected = true
       this.inputTextBuffer.value = this._selectedPage?.text ?? ''
+      console.log('Editor:selectedPage:', value)
       this.mutated()
     }
   }
@@ -41,6 +31,22 @@ export class Editor extends RXObservableEntity<Editor> {
   constructor(user: User) {
     super()
     this.user = user
+    user.pipe()
+      .map(u => u.selectedFile)
+      .removeDuplicates()
+      .onReceive((f) => this.selectedPage = f?.info)
+      .subscribe()
+
+    user.pipe()
+      .map(u => u.selectedFile)
+      .skipNullable()
+      .flatMap(f => f)
+      .map(f => f.isEditing)
+      .removeDuplicates()
+      .onReceive((isEditing) => {
+        !isEditing && this.applyTextChanges()
+      })
+      .subscribe()
     document.addEventListener('keydown', this.onKeyDown.bind(this))
   }
 
@@ -58,16 +64,18 @@ export class Editor extends RXObservableEntity<Editor> {
       else if (e.keyCode === 83) {
         e.preventDefault()
         e.stopPropagation()
-        BlogContext.self.repo.store()
+        BlogContext.self.storeService.store()
       }
       //Ctrl + Shift + E
       else if (e.keyCode === 69) {
+        if (this.user.selectedFile) {
+          this.user.selectedFile.isEditing = !this.user.selectedFile.isEditing
+        }
         e.preventDefault()
         e.stopPropagation()
-        this.toggleEditMode()
       }
       //Ctrl + Shift + F
-      else if (this.editMode && e.keyCode === 70) {
+      else if (this.user.selectedFile?.isEditing && e.keyCode === 70) {
         e.preventDefault()
         e.stopPropagation()
         const text = this.startFormatting(this.inputTextBuffer.value)
@@ -84,40 +92,35 @@ export class Editor extends RXObservableEntity<Editor> {
   //--------------------------------------
 
   createPage() {
-    if (this.editMode && this.user.selectedBook) {
-      const b = this.user.selectedBook
+    if (this.user.selectedFile?.isEditing) {
+      const f = this.user.selectedFile
       if (this.selectedPage) {
-        const curPageIndex = b.pages.findIndex(p => p.uid === this.selectedPage?.uid)
-        this.selectedPage = (b.createPage(curPageIndex + 1))
+        const curPageIndex = f.pages.findIndex(p => p.uid === this.selectedPage?.uid)
+        this.selectedPage = (f.createPage(curPageIndex + 1))
       } else {
-        this.selectedPage = b.createPage(b.pages.length)
+        this.selectedPage = f.createPage(f.pages.length)
+        window.scroll(0, document.documentElement.scrollHeight)
       }
-      window.scroll(0, document.documentElement.scrollHeight)
     }
   }
 
   movePageUp() {
-    if (this.editMode && this.selectedPage) {
-      this.selectedPage?.book?.movePageUp(this.selectedPage)
+    if (this.user.selectedFile?.isEditing && this.selectedPage) {
+      this.selectedPage?.file?.movePageUp(this.selectedPage)
     }
   }
 
   movePageDown() {
-    if (this.editMode && this.selectedPage?.book) {
-      this.selectedPage?.book.movePageDown(this.selectedPage)
+    if (this.user.selectedFile?.isEditing && this.selectedPage?.file) {
+      this.selectedPage?.file.movePageDown(this.selectedPage)
     }
   }
 
   deletePage() {
-    if (this.editMode && this.selectedPage) {
-      console.log('---Deleting page!')
-      this.selectedPage?.book?.remove(this.selectedPage)
+    console.log('---Deleting page!')
+    if (this.user.selectedFile?.isEditing && this.selectedPage && this.selectedPage?.file?.remove(this.selectedPage)) {
       this.selectedPage = undefined
     }
-  }
-
-  toggleEditMode() {
-    this.editMode = !this.editMode
   }
 
   private _timeoutID: any = undefined
@@ -126,7 +129,7 @@ export class Editor extends RXObservableEntity<Editor> {
     if (!this._timeoutID) {
       this._timeoutID = setTimeout(() => {
         this.applyTextChanges()
-      }, 2000)
+      }, 100)
     }
   }
 
@@ -143,7 +146,7 @@ export class Editor extends RXObservableEntity<Editor> {
   //--------------------------------------
   //  removeDuplicateSpaces
   //--------------------------------------
-  private _removeDuplicateSpaces: boolean = true
+  private _removeDuplicateSpaces: boolean = false
   get removeDuplicateSpaces(): boolean { return this._removeDuplicateSpaces }
   set removeDuplicateSpaces(value: boolean) {
     if (this._removeDuplicateSpaces !== value) {
@@ -199,11 +202,12 @@ export class Editor extends RXObservableEntity<Editor> {
       res = res.replace(/^-/, '—')
       res = res.replace(/-$/, '—')
       res = res.replaceAll('\n-', '\n—')
-      res = res.replaceAll('-\n', '—\n')
+      //res = res.replaceAll('-\n', '—\n')
       res = res.replace(/([А-я])- /g, '$1')
     }
 
     if (this.replaceHyphenWithDash) {
+      res = res.replace(/ -- /g, ' — ')
       res = res.replace(/ - /g, ' — ')
       res = res.replace(/ – /g, ' — ')
     }

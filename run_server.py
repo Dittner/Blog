@@ -31,29 +31,10 @@ def isReady():
 #---------------
 #     dir
 #---------------
-@app.route('/api/dirs', methods=['GET'])
-def read_all_dirs():
-  res = {}
-  if os.path.isdir(ROOT_DIR):
-    dirs = os.listdir(ROOT_DIR)
-    for dirTitle in dirs:
-      dirPath = ROOT_DIR + '/' + dirTitle
-      if not dirTitle.startswith('.') and os.path.isdir(dirPath):
-        authorsFilePath = dirPath + '/author.txt'
-        if isValidTextFile(authorsFilePath):
-          file = open(authorsFilePath, 'rt')
-          fileContent = file.read()
-          file.close()
-          res[dirTitle] = fileContent
-        else:
-          return 'File not found: ' + authorsFilePath, 500
-  else:
-    os.mkdir(ROOT_DIR)
-  return jsonify(res)
-
 def isValidTextFile(filePath):
   fileTitle, fileExtension = split(filePath, '.')
   return os.path.isfile(filePath) and not fileTitle.startswith('.') and fileExtension == 'txt'
+
 
 def split(txt, rdelim):
   ind = txt.find(rdelim)
@@ -61,58 +42,136 @@ def split(txt, rdelim):
     return (txt, '')
   return (txt[0:ind], txt[ind + 1:])
 
+def mkdirs(path):
+  ind = 0
+  dirNames = path.split('/')
+  path = ROOT_DIR
+  while ind < len(dirNames):
+    n = dirNames[ind]
+    path += '/' + n
+    if n.endswith('.txt'): break
+    if not os.path.isdir(path):
+      print('Creating new dir:', path)
+      os.mkdir(path)
+    ind += 1
+  pass
+
+
+@app.route('/api/dir', defaults={'src': ''}, methods=['GET'])
+@app.route('/api/dir/<path:src>', methods=['GET'])
+def list_dir(src):
+  if not os.path.isdir(ROOT_DIR):
+    os.mkdir(ROOT_DIR)
+    return 'Dir not found: ' + src, 404
+
+  path = ROOT_DIR + '/' + src
+  if not os.path.isdir(path):
+    return 'Not a dir: ' + src, 404
+
+  files = []
+  names = os.listdir(path)
+
+  #print('API::list_dir, src:', src, 'names:', names)
+
+  for name in names:
+    if name.startswith('.') or name == 'info.txt': continue
+    itemPath = path + '/' + name
+    if os.path.isdir(itemPath):
+      infoFilePath = path + '/' + name + '/info.txt'
+      if isValidTextFile(infoFilePath):
+        infoFile = open(infoFilePath, 'rt')
+        info = infoFile.read()
+        infoFile.close()
+        files.append( {'isDirectory':True, 'path':itemPath, 'text':info} )
+    elif isValidTextFile(itemPath):
+      fileTitle, fileExtension = split(name, '.')
+      f = open(itemPath, 'rt')
+      fileContent = f.read()
+      f.close()
+      files.append( {'isDirectory':False, 'path':itemPath, 'text':fileContent} )
+
+  return jsonify(files)  
+
+
 #---------------
 #     file
 #---------------
-@app.route('/api/dir/<dirName>', methods=['GET'])
-def read_all_files(dirName):
-  res = {}
-  if os.path.isdir(ROOT_DIR):
-    dirPath = ROOT_DIR + '/' + dirName
-    if not dirName.startswith('.') and os.path.isdir(dirPath):
-      files = os.listdir(dirPath)
-      for file in files:
-        fileName, fileExtension = split(file, '.')
-        filePath = ROOT_DIR + '/' + dirName + '/' + file
 
-        if fileName != 'author' and isValidTextFile(filePath):
-          f = open(filePath, 'rt')
-          fileContent = f.read()
-          f.close()
-          res[fileName] = fileContent
-    else:
-      return 'Dir not found: ' + dirPath, 500
-  else:
-    os.mkdir(ROOT_DIR)
-  return jsonify(res)
+@app.route('/api/file/<path:src>', methods=['GET'])
+def read_file(src):
+  print('API::read_file, filePath:', src)
+  path = ROOT_DIR + '/' + src
 
-@app.route('/api/dir/<dirName>/file/<fileName>', methods=['GET'])
-def read_file(dirName, fileName):
-  filePath = ROOT_DIR + '/' + dirName + '/' + fileName
-  print('API::read_file, filePath:', filePath)
-  file = open(filePath, 'wt')
+  if not os.path.isfile(path):
+    return 'File not found: ' + src, 404
+  
+  file = open(path, 'rt')
   fileContent = file.read()
   file.close()
   return fileContent, 200
 
 
-@app.route('/api/dir/<dirName>/file/<fileName>', methods=['PUT'])
-def write_file(dirName, fileName):
-  filePath = ROOT_DIR + '/' + dirName + '/' + fileName
-  fileContent = request.get_data(as_text=True)
-  f = open(filePath, 'wt')
-  f.write(fileContent)
+@app.route('/api/file/<path:src>', methods=['POST'])
+def write_file(src):
+  path = ROOT_DIR + '/' + src
+  if not src.endswith('.txt'):
+    print('Not a file:', path)
+    return 'Not a file: ' + src, 400
+
+  mkdirs(src)
+
+  fileDto = request.get_json()
+  
+  id = fileDto.get('id')
+  names = src.split('/')
+  count = len(names)
+
+  oldPath = ''
+  newPath = ''
+
+  if count > 1 and names[count-1] == 'info.txt':
+    fileName = names[count-2]
+    if fileName != id:
+      names[count-1] = ''
+      oldPath = ROOT_DIR + '/' + '/'.join(names)
+      names[count-2] = id
+      newPath = ROOT_DIR + '/' + '/'.join(names)
+      print('New dir path:', newPath)
+      if os.path.isdir(newPath):
+        print('Dir already exists:', newPath)
+        return 'Dir already exists: ' + newPath, 400
+  elif count > 0:
+    fileName, fileExtension = split(names[count-1], '.')
+    if fileName != id:
+      names[count-1] = id + '.txt'
+      oldPath = path
+      newPath = ROOT_DIR + '/' + '/'.join(names)
+      print('New file path:', newPath)
+      if os.path.isfile(newPath):
+        print('File already exists:', newPath)
+        return 'File already exists: ' + newPath, 400
+  
+  text = fileDto.get('text')
+  f = open(path, 'wt')
+  f.write(text)
   f.close()
+
+  if len(oldPath) > 0 and len(newPath) > 0:
+    print('Renaming from:', oldPath, ', to:', newPath)
+    os.rename(oldPath, newPath)
   return 'ok', 200
 
 
 #---------------
 #     ASSETS
 #---------------
-@app.route('/api/assets/<path:src>', methods=['GET'])
+@app.route('/api/asset/<path:src>', methods=['GET'])
 def get_image(src):
   path = ROOT_DIR + '/' + src
   print('get_image::path:', path)
+  if not os.path.isfile(path):
+    return 'Asset not found: ' + src, 404
+  
   return send_file(path, mimetype='image')
 
 

@@ -1,10 +1,9 @@
-import {CheckServerCmd} from './cmd/CheckServerCmd'
-import {type Author, type Book} from '../../domain/BlogModel'
-import {StoreBookCmd} from './cmd/StoreBookCmd'
-import {LoadAllAuthorsCmd} from './cmd/LoadAllAuthorsCmd'
-import {LoadAllBooksCmd} from './cmd/LoadAllBooksCmd'
-import {type Application} from '../../../global/application/Application'
+import {PingCmd} from './cmd/PingCmd'
+import {type File} from '../../domain/BlogModel'
+import {StoreFileCmd} from './cmd/StoreFileCmd'
+import {LoadChildrenFilesCmd} from './cmd/LoadChildrenFilesCmd'
 import {type AnyRXObservable, type RXObservable, RXObservableEntity} from '../../../lib/rx/RXPublisher'
+import {globalContext} from '../../../App'
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
 type RestApiErrorCategory = 'noConnection' | 'notAuthorized' | 'serverError' | 'clientError' | 'unknownError' | 'aborted'
@@ -13,7 +12,7 @@ export const NO_CONNECTION_STATUS = 0
 export class RestApiError extends Error {
   readonly category: RestApiErrorCategory
   readonly statusCode: number
-  constructor(category: RestApiErrorCategory, statusCode: number, message: string = '') {
+  constructor(category: RestApiErrorCategory, statusCode: number, message: string) {
     super(message)
     this.category = category
     this.statusCode = statusCode
@@ -32,17 +31,15 @@ export interface Runnable {
 export class RestApi extends RXObservableEntity<RestApi> {
   readonly baseUrl: string
   readonly assetsUrl: string
-  readonly app: Application
   headers: any = {'Content-Type': 'application/json'}
 
-  constructor(app: Application) {
+  constructor() {
     super()
     this.baseUrl = 'http://127.0.0.1:5005/api'
-    this.assetsUrl = 'http://127.0.0.1:5005/api/assets'
+    this.assetsUrl = 'http://127.0.0.1:5005/api/asset'
     console.log('RestApi, baseUrl: ', this.baseUrl)
-    this.app = app
     this.isServerRunning = false
-    this.checkServer()
+    this.ping()
   }
 
   //--------------------------------------
@@ -57,31 +54,22 @@ export class RestApi extends RXObservableEntity<RestApi> {
     }
   }
 
-  checkServer(): RXObservable<any, RestApiError> {
-    const cmd = new CheckServerCmd(this)
+  ping(): RXObservable<any, RestApiError> {
+    const cmd = new PingCmd(this)
     return cmd.run()
   }
 
   //--------------------------------------
-  //  author
+  //  dir
   //--------------------------------------
 
-  loadAllAuthors(): RXObservable<Author[], RestApiError> {
-    const cmd = new LoadAllAuthorsCmd(this)
+  loadChildrenFiles(dir: File): RXObservable<any, RestApiError> {
+    const cmd = new LoadChildrenFilesCmd(this, dir)
     return cmd.run()
   }
 
-  //--------------------------------------
-  //  book
-  //--------------------------------------
-
-  loadAllBooks(a: Author): RXObservable<Book[], RestApiError> {
-    const cmd = new LoadAllBooksCmd(this, a)
-    return cmd.run()
-  }
-
-  storeBook(b: Book): RXObservable<any, RestApiError> {
-    const cmd = new StoreBookCmd(this, b)
+  storeFile(f: File): RXObservable<any, RestApiError> {
+    const cmd = new StoreFileCmd(this, f)
     return cmd.run()
   }
 
@@ -115,7 +103,7 @@ export class RestApi extends RXObservableEntity<RestApi> {
       return [response, null]
     } catch (e: any) {
       const msg = 'Unable to ' + method + ' resource: ' + this.baseUrl + path
-      //GlobalContext.self.app.errorMsg = msg
+      globalContext.app.errorMsg = msg
       console.log(msg, '. Details:', e)
       return [null, null]
     }
@@ -127,14 +115,18 @@ export class RestApi extends RXObservableEntity<RestApi> {
       console.log('Response status:', response.status)
       console.log('Problem details:', details)
       if (response.status === 401 || response.status === 403) {
-        throw new RestApiError('notAuthorized', response.status)
+        throw new RestApiError('notAuthorized', response.status, 'User not authorized')
+      } else if (response.status === 400) {
+        throw new RestApiError('clientError', response.status, details)
+      } else if (response.status === 404) {
+        throw new RestApiError('clientError', response.status, details)
       } else if (response.status >= 500) {
-        throw new RestApiError('serverError', response.status)
+        throw new RestApiError('serverError', response.status, 'Server error: ' + details)
       } else {
-        throw new RestApiError('unknownError', response.status)
+        throw new RestApiError('unknownError', response.status, 'Unknown error: ' + details)
       }
     } else {
-      throw new RestApiError('noConnection', NO_CONNECTION_STATUS)
+      throw new RestApiError('noConnection', NO_CONNECTION_STATUS, 'No response')
     }
   }
 

@@ -1,4 +1,4 @@
-import {RXObservableEntity} from '../../lib/rx/RXPublisher'
+import {RXObservableEntity} from '../../../lib/rx/RXPublisher'
 
 export class BlogMenu extends RXObservableEntity<BlogMenu> {
   private _isShown: boolean = true
