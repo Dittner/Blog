@@ -43,8 +43,8 @@ def split(txt, rdelim):
   return (txt[0:ind], txt[ind + 1:])
 
 def mkdirs(path):
-  ind = 0
   dirNames = path.split('/')
+  ind = 1 if len(dirNames) > 0 and dirNames[0] == ROOT_DIR else 0
   path = ROOT_DIR
   while ind < len(dirNames):
     n = dirNames[ind]
@@ -159,6 +159,23 @@ def write_file(src):
   if len(oldPath) > 0 and len(newPath) > 0:
     print('Renaming from:', oldPath, ', to:', newPath)
     os.rename(oldPath, newPath)
+  return 'ok', 200
+
+
+@app.route('/api/file/<path:src>', methods=['DELETE'])
+def delete_file(src):
+  path = ROOT_DIR + '/' + src
+  print('Deleting file, path:', path)
+  if not os.path.isfile(path) and not os.path.isdir(path):
+    return 'File not found: ' + src, 404
+
+  newPath = path.replace('/repo/', '/bin/', 1)
+  
+  if newPath != path:
+    mkdirs(newPath)
+    os.replace(path, newPath)
+    print('Deleting file has been moved to:', newPath)
+
   return 'ok', 200
 
 

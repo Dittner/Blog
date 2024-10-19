@@ -4,6 +4,7 @@ import {StoreFileCmd} from './cmd/StoreFileCmd'
 import {LoadChildrenFilesCmd} from './cmd/LoadChildrenFilesCmd'
 import {type AnyRXObservable, type RXObservable, RXObservableEntity} from '../../../lib/rx/RXPublisher'
 import {globalContext} from '../../../App'
+import {RemoveFileCmd} from './cmd/RemoveFileCmd'
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
 type RestApiErrorCategory = 'noConnection' | 'notAuthorized' | 'serverError' | 'clientError' | 'unknownError' | 'aborted'
@@ -70,6 +71,11 @@ export class RestApi extends RXObservableEntity<RestApi> {
 
   storeFile(f: File): RXObservable<any, RestApiError> {
     const cmd = new StoreFileCmd(this, f)
+    return cmd.run()
+  }
+
+  removeFile(f: File): RXObservable<any, RestApiError> {
+    const cmd = new RemoveFileCmd(this, f)
     return cmd.run()
   }
 

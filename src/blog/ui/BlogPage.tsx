@@ -95,7 +95,7 @@ export const BlogPage = observer(() => {
             textAlign='center'
             paddingTop={window.innerHeight / 2 + 'px'}
             textColor={theme.text50}
-            text='Directory not selected'
+            text='File not selected'
             fontSize='0.8rem'/>
         }
 
@@ -236,13 +236,14 @@ const FileView = observer(({file}: {file: File}) => {
   console.log('new FileView')
   observe(file)
   const theme = themeManager.theme
+  const user = blogContext.user
 
   return (
     <VStack
       textColor={theme.text}
       className='article'
       gap="0"
-      paddingBottom='50px'
+      paddingBottom='20px'
       width="100%">
       {!file.isEditing &&
         <FileBtnBar file={file}/>
@@ -257,6 +258,18 @@ const FileView = observer(({file}: {file: File}) => {
         return <PageView key={page.uid} page={page} index={index}/>
       })}
 
+      {file.isEditing &&
+        <HStack
+          width='50%' height='100px'
+          halign='right' valign='bottom'
+          paddingHorizontal='20px'>
+          <TextButton
+            title='Delete'
+            onClick={() => {
+              user.remove(file)
+            }}/>
+        </HStack>
+      }
     </VStack>
   )
 })

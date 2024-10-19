@@ -61,6 +61,23 @@ export class User extends RXObservableEntity<User> {
     this.repo.children.push(f)
     this.mutated()
   }
+
+  remove(f: File) {
+    const ind = f.parent?.children.indexOf(f) ?? -1
+    if (ind !== -1) {
+      this.restApi.removeFile(f).pipe()
+        .onReceive(() => {
+          console.log('User:remove:onReceive')
+          f.parent?.children.splice(ind, 1)
+          if (this.selectedFile === f) {
+            this.selectedFile = undefined
+          }
+          this.mutated()
+        })
+    } else {
+      console.log('Removing file not found')
+    }
+  }
 }
 
 /*

@@ -241,7 +241,7 @@ export class ThemeManager extends RXObservableEntity<ThemeManager> {
       fontSize: t.defFontSize,
       fontWeight: t.defFontWeight,
       //textIndent: '2rem',
-      paddingTop: t.defFontSize,
+      //paddingTop: t.defFontSize,
       textColor
     }
     buildRule(pProps, parentSelector, 'p')
