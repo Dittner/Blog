@@ -19,6 +19,30 @@ export const TextButton = (props: ButtonProps) => {
     {...props}/>
 }
 
+export const ToggleButton = (props: ButtonProps) => {
+  if ('visible' in props && !props.visible) return <></>
+  const theme = themeManager.theme
+
+  return <Button
+    fontSize='0.9rem'
+    paddingBottom='1px'
+    minHeight='25px'
+    paddingHorizontal='10px'
+    cornerRadius='4px'
+    bgColor={undefined}
+    textColor={theme.red}
+    hoverState={(state: ButtonProps) => {
+      state.btnCursor = true
+      state.textColor = theme.isLight ? theme.red + 'cc' : theme.white
+    }}
+    selectedState={(state: ButtonProps) => {
+      state.btnCursor = true
+      state.textColor = '#eeEEee'
+      state.bgColor = theme.red + 'cc'
+    }}
+    {...props}/>
+}
+
 /*
 *
 * IconButton
@@ -58,7 +82,7 @@ export const IconButton = (props: IconButtonProps) => {
     bgColor={undefined}
     textColor={theme.red}
     hoverState={state => {
-      state.textColor = theme.isLight ? theme.red + 'cc' : theme.header
+      state.textColor = theme.isLight ? theme.red + 'cc' : theme.h1
     }}
     selectedState={state => {
       state.textColor = theme.white

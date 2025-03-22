@@ -28,6 +28,20 @@ export class Editor extends RXObservableEntity<Editor> {
     }
   }
 
+  //--------------------------------------
+  //  isTextReplacing
+  //--------------------------------------
+  readonly replaceSubstringProtocol:InputProtocol = {value: ''}
+  readonly replaceWithProtocol:InputProtocol = {value: ''}
+  private _isTextReplacing: boolean = false
+  get isTextReplacing(): boolean { return this._isTextReplacing }
+  set isTextReplacing(value: boolean) {
+    if (this._isTextReplacing !== value) {
+      this._isTextReplacing = value
+      this.mutated()
+    }
+  }
+
   constructor(user: User) {
     super()
     this.user = user
@@ -53,6 +67,11 @@ export class Editor extends RXObservableEntity<Editor> {
   private onKeyDown(e: KeyboardEvent) {
     //Ctrl + Shift + P
     //console.log('Ctrl + Shift + ', e.keyCode)
+    //Ignore TAB key
+    if (e.keyCode === 9) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
     if (e.ctrlKey && e.shiftKey) {
       //Ctrl + Shift + P
       if (e.keyCode === 80) {
@@ -146,7 +165,7 @@ export class Editor extends RXObservableEntity<Editor> {
   //--------------------------------------
   //  removeDuplicateSpaces
   //--------------------------------------
-  private _removeDuplicateSpaces: boolean = false
+  private _removeDuplicateSpaces: boolean = true
   get removeDuplicateSpaces(): boolean { return this._removeDuplicateSpaces }
   set removeDuplicateSpaces(value: boolean) {
     if (this._removeDuplicateSpaces !== value) {
@@ -191,30 +210,41 @@ export class Editor extends RXObservableEntity<Editor> {
       //remove new lines and spaces at the beginning of the text
       res = res.replace(/^[\n| ]+/, '')
       //remove new lines and spaces at the end of the text
-      res = res.replace(/[\n| ]+$/, '')
+      res = res.replace(/[\n ]+$/, '')
       //remove spaces at the beginning of line
       res = res.replace(/\n +/g, '\n')
       res = res.replace(/ +/g, ' ')
       res = res.replace(/ +,/g, ',')
     }
 
-    if (this.removeHyphenAndSpace) {
-      res = res.replace(/^-/, '—')
-      res = res.replace(/-$/, '—')
-      res = res.replaceAll('\n-', '\n—')
-      //res = res.replaceAll('-\n', '—\n')
-      res = res.replace(/([А-я])- /g, '$1')
+    if (this.replaceHyphenWithDash) {
+      //res = res.replace(/-- /g, '— ')
+      //res = res.replace(/ -- /g, ' — ')
+      res = res.replace(/([,.])- /g, '$1 — ')
+      res = res.replace(/ [-–] /g, ' — ')
     }
 
-    if (this.replaceHyphenWithDash) {
-      res = res.replace(/ -- /g, ' — ')
-      res = res.replace(/ - /g, ' — ')
-      res = res.replace(/ – /g, ' — ')
+    if (this.removeHyphenAndSpace) {
+      res = res.replace(/^[-–] /gm, '— ')
+      res = res.replace(/ [-–]$/gm, '—')
+      res = res.replaceAll('\n- ', '\n— ')
+      //res = res.replaceAll('-\n', '—\n')
+      res = res.replace(/([А-я])- \n/g, '$1')
     }
+
+    res = res.replace(/[”„“«»]/g, '"')
+    res = res.replace(/…/g, '...')
 
     const max = this.maxEmptyLines.value
     res = res.replace(new RegExp(`\n{${max},}`, 'g'), '\n'.repeat(max))
 
     return res
+  }
+
+  replaceWith(substr: string, replaceValue: string) {
+    if (this.user.selectedFile?.isEditing && substr) {
+      this.user.selectedFile.replaceWith(substr, replaceValue)
+      this.inputTextBuffer.value = this.selectedPage?.text ?? ''
+    }
   }
 }

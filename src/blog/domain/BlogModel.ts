@@ -243,7 +243,7 @@ export class File extends RXObservableEntity<File> {
     const id = generateUID()
     let text = INFO_KEY_ID + '\n' + id + '\n\n'
     text += INFO_KEY_NAME + '\n' + id + '\n\n'
-    text += INFO_KEY_GENRE + '\n' + 'philosophy | literature | movie | science | art\n\n'
+    text += INFO_KEY_GENRE + '\n' + 'philosophy | literature | movie | science | art | memoirs\n\n'
     text += INFO_KEY_YEAR + '\n' + (new Date()).getFullYear() + '\n\n'
     text += INFO_KEY_ABOUT + '\n' + 'Description'
 
@@ -269,6 +269,8 @@ export class File extends RXObservableEntity<File> {
     text += INFO_IS_AUTHOR + '\nfalse\n\n'
     text += INFO_AUTHOR_BIRTH_YEAR + '\n1900\n\n'
     text += INFO_AUTHOR_DEATH_YEAR + '\n2000'
+    text += INFO_KEY_PHOTO + '\n/repo/ID/img/photo.png'
+    text += INFO_KEY_ABOUT + '\nBiography'
 
     const res = new File()
     res._filesLoaded = true
@@ -351,6 +353,18 @@ export class File extends RXObservableEntity<File> {
       return true
     }
     return false
+  }
+
+  replaceWith(substr: string, replaceValue: string) {
+    if (!substr) return
+
+    this.pages.forEach(p => {
+      let res = p.text
+
+      res = res.replace(new RegExp(substr, "g"), replaceValue)
+      res = res.replace(/\\n/g, '\n')
+      p.text = res
+    })
   }
 
   private store() {
@@ -472,7 +486,7 @@ export class InfoPage extends Page {
   get year(): string { return this._year }
 
   //--------------------------------------
-  //  genre: movie | philosophy | literature | science | art
+  //  genre: movie | philosophy | literature | science | art | memoirs
   //--------------------------------------
   private _genre: string = ''
   get genre(): string { return this._genre }
@@ -502,11 +516,15 @@ export class InfoPage extends Page {
   get author(): Author | undefined { return this._author }
 
   deserialize(text: string) {
-    const keyValues = text.split('\n\n')
+    const keyValues = text.replace(/\n{3,}/g, '\n\n').split('\n\n')
     this._text = text
     let isAuthor = false
     let authorBirthYear = ''
     let authorDeathYear = ''
+
+    const aboutIndex = text.indexOf(INFO_KEY_ABOUT + '\n')
+    this._about = aboutIndex === -1 ? '' : text.substring(aboutIndex + INFO_KEY_ABOUT.length + 1)
+    
 
     for (let i = 0; i < keyValues.length; i++) {
       const keyValue = keyValues[i]
@@ -516,7 +534,7 @@ export class InfoPage extends Page {
 
       if (!key) continue
 
-      if (key === INFO_KEY_ID) {
+      if (key === INFO_KEY_ID) { 
         this._id = value
       } else if (key === INFO_KEY_NAME) {
         this._name = value
@@ -533,7 +551,7 @@ export class InfoPage extends Page {
       } else if (key === INFO_KEY_PHOTO) {
         this._photo = value
       } else if (key === INFO_KEY_ABOUT) {
-        this._about = value
+        break
       } else if (key === INFO_KEY_GENRE) {
         this._genre = value
       } else {

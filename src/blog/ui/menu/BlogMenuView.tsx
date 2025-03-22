@@ -4,7 +4,6 @@ import {observeBlogMenu, observeUser} from '../../BlogContext'
 import {themeManager} from '../../../global/application/ThemeManager'
 import type {JSX} from 'react/jsx-runtime'
 import {LayoutLayer} from '../../../global/application/Application'
-import React from 'react'
 import {type File} from '../../domain/BlogModel'
 import {type IconType, TextButton} from '../../../global/ui/Button'
 import {useNavigate} from 'react-router'
@@ -33,7 +32,8 @@ export const BlogMenuView = observer(() => {
     width='100%'
     gap='8px'
     className='ltr'
-    paddingLeft='30px'
+    fontSize='0.9rem'
+    paddingLeft='40px'
     paddingRight='20px'
     paddingBottom='20px'
     layer={LayoutLayer.MODAL}>
@@ -91,7 +91,7 @@ const MenuLinkBtn = (props: MenuLinkBtnProps) => {
 
   if (props.icon) {
     return <HStack
-      valign='base'
+      valign='top'
       gap='5px'
       hoverState={hoverState}
       textColor={textColor}
@@ -103,6 +103,7 @@ const MenuLinkBtn = (props: MenuLinkBtnProps) => {
       />
       <LinkButton
         link={link}
+        paddingTop='2px'
         title={title}
         fontWeight={fontWeight}
         lineHeight='1.1'
@@ -122,20 +123,26 @@ const MenuLinkBtn = (props: MenuLinkBtnProps) => {
     {...style}/>
 }
 
-const SUBTITLE_SEARCH_REG = /#+ *(.+)/i
+const SUBTITLE_SEARCH_REG = /\$#+ *(.+)/i
 const FileContentHeadersView = ({file, paddingLeftPx}: {file: File, paddingLeftPx: number}) => {
   const theme = themeManager.theme
   return <>
     {file.pages.map((p, index) => {
-      if (!p.text.startsWith('#')) return null
-      const isSubtitle = p.text.indexOf('###') === 0
+      if (!p.text.startsWith('$#')) return null
+      let headerLevel = -2
+      let i = 1
+      while (p.text.length > i && p.text.at(i) === '#') {
+        headerLevel++
+        i++
+      }
+
       const res = p.text.match(SUBTITLE_SEARCH_REG)
       const h = res && res.length > 0 ? res[1] : ''
 
       return <MenuLinkBtn
         key={p.uid}
         width='100%'
-        paddingLeft={paddingLeftPx + (isSubtitle ? 20 : 0) + 'px'}
+        paddingLeft={(paddingLeftPx + headerLevel * 20) + 'px'}
         textColor={theme.blue}
         fontWeight={theme.defFontWeight}
         title={h}

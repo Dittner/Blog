@@ -7,7 +7,7 @@
 
 @font-face {
   font-family: 'verdana';
-  src: url('resources/fonts/VerdanaPro-Regular.ttf') format('truetype');
+  src: url('resources/fonts/Verdana.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block;
@@ -23,7 +23,7 @@
 
 @font-face {
   font-family: 'verdana';
-  src: url('resources/fonts/VerdanaPro-Italic.ttf') format('truetype');
+  src: url('resources/fonts/Verdanai.ttf') format('truetype');
   font-weight: normal;
   font-style: italic;
   font-display: block;
@@ -162,7 +162,7 @@ body, p, a, b, i, h1, h2, h3, h4, h5, h6, blockquote {
 }
 
 .blurred {
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(15px);
 }
 
 .red {
@@ -289,7 +289,8 @@ textarea {
   border: none;
   resize: none;
   outline: none;
-  overflow: visible;
+  overflow: hidden;
+  scroll-behavior: auto;
   overscroll-behavior: none;
 }
 
@@ -531,6 +532,6 @@ button {
 }
 
 .icon-folder:before {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   content: "\e908";
 }

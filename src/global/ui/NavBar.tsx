@@ -1,7 +1,7 @@
 import {LayoutLayer} from '../application/Application'
 import {Button, type ButtonProps, HStack, Label, LinkButton, type LinkButtonProps, Spacer} from 'react-nocss'
 import React from 'react'
-import {IconButton, TextButton} from './Button'
+import {IconButton, TextButton, ToggleButton} from './Button'
 import {themeManager} from '../application/ThemeManager'
 import {observeApi, observeBlogMenu, observeEditor, observeStoreService, observeUser} from '../../blog/BlogContext'
 import {type File} from '../../blog/domain/BlogModel'
@@ -40,9 +40,13 @@ export const NavBar = observer(() => {
     width='100%' height='40px' gap="8px"
     paddingRight='10px'
     layer={LayoutLayer.HEADER}>
-    <IconButton icon={theme.isLight ? 'sun' : 'moon'} onClick={() => {
-      theme.isLight ? themeManager.setDarkTheme() : themeManager.setLightTheme()
-    }}/>
+    <IconButton
+      icon={theme.isLight ? 'sun' : 'moon'}
+      paddingRight='0'
+      textColor={theme.id === 'night' ? theme.white : theme.red}
+      onClick={() => {
+        theme.id === 'light'? themeManager.setDarkTheme() : theme.id === 'dark' ? themeManager.setNightTheme() : themeManager.setLightTheme()
+      }}/>
 
     <Button
       title='INDEX'
@@ -111,7 +115,7 @@ const NavSeparator = () => {
   return <Label
     text='>'
     opacity='0.5'
-    textColor={themeManager.theme.header}
+    textColor={themeManager.theme.h1}
     fontWeight='800'
     fontSize='0.5rem'/>
 }
@@ -161,12 +165,18 @@ const ToolsPanel = observer(() => {
       className="tools"
       valign="center"
       halign="left"
-      height="40px" gap="4px">
+      height="40px" gap="8px">
 
       <TextButton
         title='Add Page'
         popUp="Add new page (Ctrl + Shift + P)"
         onClick={createPage}/>
+
+      <ToggleButton
+        title='Replace'
+        popUp="Rwplace with (Ctrl + Shift + R)"
+        isSelected={editor.isTextReplacing}
+        onClick={()=> editor.isTextReplacing = !editor.isTextReplacing}/>
 
       <IconButton
         icon="up"

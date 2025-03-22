@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {useState} from 'react'
-import {HStack, Label, stylable, type StylableComponentProps, TextInput, type TextInputProps} from 'react-nocss'
+import {HStack, Label, stylable, type StylableComponentProps, TextInput, type TextInputProps, VStack} from 'react-nocss'
 import {type GlobalTheme, themeManager} from '../application/ThemeManager'
 
 /*
@@ -18,20 +18,20 @@ export interface InputFormProps extends TextInputProps {
 const defInputFormProps = (theme: GlobalTheme): any => {
   return {
     width: '100%',
-    height: '30px',
+    height: '40px',
     caretColor: theme.text,
-    textColor: theme.text,
-    bgColor: theme.text + '05',
-    titleSize: '0.9rem',
-    titleColor: theme.header,
-    fontSize: '1rem',
+    textColor: theme.h1,
+    bgColor: theme.text + '10',
+    titleSize: '1rem',
+    titleColor: theme.text,
+    fontSize: '1.4rem',
     padding: '10px',
     autoCorrect: 'off',
     autoComplete: 'off',
     border: 'none',
     borderBottom: ['1px', 'solid', theme.violet + '50'],
     focusState: (state: StylableComponentProps) => {
-      state.bgColor = theme.violet + '20'
+      state.borderBottom = ['1px', 'solid', theme.red]
     }
   }
 }
@@ -41,19 +41,19 @@ export const InputForm = (props: InputFormProps) => {
   const style = {...defInputFormProps(themeManager.theme), ...props}
 
   return (
-    <HStack
-      halign="left" valign="center" gap="5px"
+    <VStack
+      halign="left" valign="top" gap="0px"
       width={style.width}>
 
       {style.title &&
         <Label fontSize={style.titleSize}
-          width='100px' textAlign='right'
+          width='100%' textAlign='left'
           text={style.title}
           textColor={style.titleColor}/>
       }
 
       <TextInput {...style}/>
-    </HStack>
+    </VStack>
   )
 }
 
