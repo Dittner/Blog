@@ -97,6 +97,7 @@ export const INFO_KEY_PHOTO = 'PHOTO'
 export const INFO_KEY_ABOUT = 'ABOUT'
 export const INFO_KEY_MARKDOWN = 'MARKDOWN'
 export const INFO_IS_AUTHOR = 'IS_AUTHOR'
+export const INFO_CODE = 'CODE'
 export const INFO_AUTHOR_BIRTH_YEAR = 'BIRTH_YEAR'
 export const INFO_AUTHOR_DEATH_YEAR = 'DEATH_YEAR'
 
@@ -245,6 +246,7 @@ export class File extends RXObservableEntity<File> {
     text += INFO_KEY_NAME + '\n' + id + '\n\n'
     text += INFO_KEY_GENRE + '\n' + 'philosophy | literature | movie | science | art | memoirs\n\n'
     text += INFO_KEY_YEAR + '\n' + (new Date()).getFullYear() + '\n\n'
+    text += INFO_CODE + '\nfalse\n\n'
     text += INFO_KEY_ABOUT + '\n' + 'Description'
 
     const res = new File()
@@ -268,8 +270,8 @@ export class File extends RXObservableEntity<File> {
     text += INFO_KEY_NAME + '\n' + id + '\n\n'
     text += INFO_IS_AUTHOR + '\nfalse\n\n'
     text += INFO_AUTHOR_BIRTH_YEAR + '\n1900\n\n'
-    text += INFO_AUTHOR_DEATH_YEAR + '\n2000'
-    text += INFO_KEY_PHOTO + '\n/repo/ID/img/photo.png'
+    text += INFO_AUTHOR_DEATH_YEAR + '\n2000\n\n'
+    text += INFO_KEY_PHOTO + '\n/repo/ID/img/photo.png\n\n'
     text += INFO_KEY_ABOUT + '\nBiography'
 
     const res = new File()
@@ -486,6 +488,12 @@ export class InfoPage extends Page {
   get year(): string { return this._year }
 
   //--------------------------------------
+  //  isCode
+  //--------------------------------------
+  private _isCode: boolean = false
+  get isCode(): boolean { return this._isCode }
+
+  //--------------------------------------
   //  genre: movie | philosophy | literature | science | art | memoirs
   //--------------------------------------
   private _genre: string = ''
@@ -540,6 +548,8 @@ export class InfoPage extends Page {
         this._name = value
       } else if (key === INFO_IS_AUTHOR) {
         isAuthor = value.toLowerCase() === 'true'
+      } else if (key === INFO_CODE) {
+        this._isCode = value.toLowerCase() === 'true'
       } else if (key === INFO_AUTHOR_BIRTH_YEAR) {
         authorBirthYear = value
       } else if (key === INFO_AUTHOR_DEATH_YEAR) {

@@ -65,61 +65,82 @@ class TextEditorController {
     ta.focus()
   }
 
-  static adjustScroller(ta: HTMLTextAreaElement | undefined | null) {
-    if (ta) {
-      ta.style.height = 'inherit'
-      ta.style.height = `${ta.scrollHeight + 5}px`
-    }
+  static newLine(ta: HTMLTextAreaElement) {
+    const value = ta.value
+    const selectionStart = ta.selectionStart
+
+    let beginRowIndex = value.lastIndexOf('\n', selectionStart - 1)
+    beginRowIndex = beginRowIndex !== -1 ? beginRowIndex + 1 : 0
+
+    const row = value.slice(beginRowIndex, selectionStart)
+    const beginRowSpaces = TextEditorController.calcSpaceBefore(row)
+    const endRowSpaces = /(:|\(|\{) *$/.test(row) ? 4 : 0
+    //console.log('Row:' + 'BEGIN' + row + 'END, beginRowSpaces:', beginRowSpaces)
+
+    const spaces = '\n' + ' '.repeat(beginRowSpaces + endRowSpaces)
+    // func setRangeText unfortunately clears browser history
+    // ta.current.setRangeText(spaces, selectionStart, selectionStart, 'end')
+    document.execCommand('insertText', false, spaces)
+    TextEditorController.scrollToCursor(ta)
   }
 
-  static moveCursorToEndLine(ta: HTMLTextAreaElement | undefined | null) {
-    if (ta) {
-      const endOfTheLineIndex = ta.value.indexOf('\n', ta.selectionStart)
-      if (endOfTheLineIndex !== -1) {
-        ta.setSelectionRange(endOfTheLineIndex, endOfTheLineIndex)
-      } else {
-        ta.setSelectionRange(ta.value.length, ta.value.length)
+  static calcSpaceBefore(row: string): number {
+    if (!row) return 0
+    for (let i = 0; i < row.length; i++) {
+      if (row.charAt(i) !== ' ') {
+        return i
       }
     }
+    return row.length
   }
 
-  static moveCursorToBeginLine(ta: HTMLTextAreaElement | undefined | null) {
-    if (ta) {
-      let beginOfTheLineIndex = ta.value.lastIndexOf('\n', ta.selectionStart - 1)
-      if (beginOfTheLineIndex !== -1) {
-        for (let i = beginOfTheLineIndex + 1; i < ta.value.length; i++) {
-          if (ta.value.at(i) !== ' ') {
-            beginOfTheLineIndex = i
-            break
-          }
+  static adjustScroller(ta: HTMLTextAreaElement) {
+    ta.style.height = 'inherit'
+    ta.style.height = `${ta.scrollHeight + 5}px`
+  }
+
+  static moveCursorToEndLine(ta: HTMLTextAreaElement) {
+    const endOfTheLineIndex = ta.value.indexOf('\n', ta.selectionStart)
+    if (endOfTheLineIndex !== -1) {
+      ta.setSelectionRange(endOfTheLineIndex, endOfTheLineIndex)
+    } else {
+      ta.setSelectionRange(ta.value.length, ta.value.length)
+    }
+  }
+
+  static moveCursorToBeginLine(ta: HTMLTextAreaElement) {
+    let beginOfTheLineIndex = ta.value.lastIndexOf('\n', ta.selectionStart - 1)
+    if (beginOfTheLineIndex !== -1) {
+      for (let i = beginOfTheLineIndex + 1; i < ta.value.length; i++) {
+        if (ta.value.at(i) !== ' ') {
+          beginOfTheLineIndex = i
+          break
         }
-        ta.setSelectionRange(beginOfTheLineIndex, beginOfTheLineIndex)
-      } else {
-        ta.setSelectionRange(0, 0)
       }
-    }
-  }
-
-  static removeSentenceUnderCursor(ta: HTMLTextAreaElement | undefined | null) {
-    if (ta) {
-      let beginOfTheLineIndex = ta.value.lastIndexOf('\n', ta.selectionStart - 1)
-      if (beginOfTheLineIndex === -1) beginOfTheLineIndex = 0
-      let endOfTheLineIndex = ta.value.indexOf('\n', ta.selectionStart)
-      if (endOfTheLineIndex === -1) endOfTheLineIndex = ta.value.length
-
-      ta.setSelectionRange(beginOfTheLineIndex, endOfTheLineIndex)
-      document.execCommand('insertText', false, '')
-      ta.setSelectionRange(beginOfTheLineIndex, endOfTheLineIndex)
-
-      if (beginOfTheLineIndex < ta.value.length - 1) beginOfTheLineIndex++
       ta.setSelectionRange(beginOfTheLineIndex, beginOfTheLineIndex)
-      this.moveCursorToEndLine(ta)
+    } else {
+      ta.setSelectionRange(0, 0)
     }
   }
 
-  static uppercase(ta: HTMLTextAreaElement | undefined | null) {
+  static removeSentenceUnderCursor(ta: HTMLTextAreaElement) {
+    let beginOfTheLineIndex = ta.value.lastIndexOf('\n', ta.selectionStart - 1)
+    if (beginOfTheLineIndex === -1) beginOfTheLineIndex = 0
+    let endOfTheLineIndex = ta.value.indexOf('\n', ta.selectionStart)
+    if (endOfTheLineIndex === -1) endOfTheLineIndex = ta.value.length
+
+    ta.setSelectionRange(beginOfTheLineIndex, endOfTheLineIndex)
+    document.execCommand('insertText', false, '')
+    ta.setSelectionRange(beginOfTheLineIndex, endOfTheLineIndex)
+
+    if (beginOfTheLineIndex < ta.value.length - 1) beginOfTheLineIndex++
+    ta.setSelectionRange(beginOfTheLineIndex, beginOfTheLineIndex)
+    this.moveCursorToEndLine(ta)
+  }
+
+  static uppercase(ta: HTMLTextAreaElement) {
     try {
-      if (!ta || ta.selectionStart === ta.selectionEnd) return
+      if (ta.selectionStart === ta.selectionEnd) return
       let text = ta.value.slice(ta.selectionStart, ta.selectionEnd)
       document.execCommand('insertText', false, text.toUpperCase())
     } catch (e) {
@@ -127,9 +148,42 @@ class TextEditorController {
     }
   }
 
-  static lowercase(ta: HTMLTextAreaElement | undefined | null) {
+  static removeNewLines(ta: HTMLTextAreaElement) {
     try {
-      if (!ta || ta.selectionStart === ta.selectionEnd) return
+      if (ta.selectionStart === ta.selectionEnd) return
+      let text = ta.value.slice(ta.selectionStart, ta.selectionEnd)
+      text = text.replace(/[-–—]\n/g, '')
+      text = text.replace(/\n/g, ' ').replace('  ', ' ')
+      document.execCommand('insertText', false, text)
+    } catch (e) {
+      console.log('TextEditorController:removeNewLines: ', e)
+    }
+  }
+
+  static duplicateLine(ta: HTMLTextAreaElement) {
+    let beginOfTheLineIndex = ta.value.lastIndexOf('\n', ta.selectionStart - 1)
+    if (beginOfTheLineIndex === -1) beginOfTheLineIndex = 0
+    let endOfTheLineIndex = ta.value.indexOf('\n', ta.selectionStart)
+    if (endOfTheLineIndex === -1) endOfTheLineIndex = ta.value.length
+    //console.log('TextEditorController:duplicateLine, range:', beginOfTheLineIndex, endOfTheLineIndex)
+
+    const line = beginOfTheLineIndex === 0 ?
+      '\n' + ta.value.slice(beginOfTheLineIndex, endOfTheLineIndex) :
+      ta.value.slice(beginOfTheLineIndex, endOfTheLineIndex)
+
+    if (!line) return
+
+    ta.setSelectionRange(endOfTheLineIndex, endOfTheLineIndex)
+    document.execCommand('insertText', false, line)
+  }
+
+  static tabulate(ta: HTMLTextAreaElement) {
+    document.execCommand('insertText', false, '    ')
+  }
+
+  static lowercase(ta: HTMLTextAreaElement) {
+    try {
+      if (ta.selectionStart === ta.selectionEnd) return
       let text = ta.value.slice(ta.selectionStart, ta.selectionEnd)
       document.execCommand('insertText', false, text.toLowerCase())
     } catch (e) {
@@ -137,9 +191,13 @@ class TextEditorController {
     }
   }
 
-  static wrapAsMultilineCode(ta: HTMLTextAreaElement | undefined | null) {
+  static wrapAsMultilineCode(ta: HTMLTextAreaElement) {
     try {
-      if (!ta || ta.selectionStart === ta.selectionEnd) return
+      if (ta.selectionStart === ta.selectionEnd) {
+        document.execCommand('insertText', false, '```\n```')
+        ta.setSelectionRange(ta.selectionStart - 4, ta.selectionStart - 4)
+        return
+      }
       let selectionStart = ta.selectionStart
       let text = ta.value.slice(ta.selectionStart, ta.selectionEnd)
       document.execCommand('insertText', false, '```\n' + text + '\n```')
@@ -185,14 +243,18 @@ export const TextEditor = (props: TextEditorProps) => {
   }
 
   useEffect(() => {
-    TextEditorController.adjustScroller(ta?.current)
-    if (ta.current) ta.current.setSelectionRange(0, 0)
+    if (ta.current) {
+      TextEditorController.adjustScroller(ta?.current)
+      ta.current.setSelectionRange(0, 0)
+    }
 
     if (props.keepFocus) ta.current?.focus()
   }, [width, height, props])
 
   const onKeyDown = (e: any) => {
     console.log('e.keyCode = ', e.keyCode)
+    if (!ta.current) return
+
     // Ctrl+Shift+U
     if (e.ctrlKey && e.shiftKey && e.keyCode === 85) {
       e.preventDefault()
@@ -218,22 +280,27 @@ export const TextEditor = (props: TextEditorProps) => {
         TextEditorController.wrapAsMultilineCode(ta.current)
         TextEditorController.scrollToCursor(ta.current)
       }
-    } else if (e.keyCode === 13) {
-      //we are using trick to avoid scroll jump in chrome when typing new line
+    } // Ctrl+Shift+R
+    else if (e.ctrlKey && e.shiftKey && e.keyCode === 82) {
       e.preventDefault()
       e.stopPropagation()
-      if (ta.current) {
-        const i = ta.current.selectionStart
-        const v = ta.current.value
-        ta.current.value = v.substring(0, i) + '\n' + v.substring(i)
-
-        ta.current.setSelectionRange(i + 1, i + 1)
-        ta.current.blur()
-        ta.current.focus()
-
-        if (props.protocol) props.protocol.value = ta.current.value
-        if (props.onChange) props.onChange(ta.current.value)
-      }
+      TextEditorController.removeNewLines(ta.current)
+    } // Ctrl+Shift+D
+    else if (e.ctrlKey && e.shiftKey && e.keyCode === 68) {
+      e.preventDefault()
+      e.stopPropagation()
+      TextEditorController.duplicateLine(ta.current)
+    } // Tab
+    else if (e.keyCode === 9) {
+      e.preventDefault()
+      e.stopPropagation()
+      TextEditorController.tabulate(ta.current)
+    }
+    else if (e.keyCode === 13) {
+      e.stopPropagation()
+      e.preventDefault()
+      TextEditorController.newLine(ta.current)
+      TextEditorController.adjustScroller(ta.current)
     } // ESC
     else if (e.keyCode === 27) {
       e.preventDefault()
@@ -251,7 +318,7 @@ export const TextEditor = (props: TextEditorProps) => {
     else if (e.keyCode === 34 && ta?.current) {
       e.preventDefault()
       e.stopPropagation()
-      const length = ta?.current?.value.length ?? 0
+      const length = ta.current.value.length
       ta.current.setSelectionRange(length, length)
       TextEditorController.scrollToCursor(ta.current)
     }
@@ -259,13 +326,13 @@ export const TextEditor = (props: TextEditorProps) => {
     else if (e.keyCode === 36) {
       e.preventDefault()
       e.stopPropagation()
-      TextEditorController.moveCursorToBeginLine(ta?.current)
+      TextEditorController.moveCursorToBeginLine(ta.current)
     }
     // End key
     else if (e.keyCode === 35) {
       e.preventDefault()
       e.stopPropagation()
-      TextEditorController.moveCursorToEndLine(ta?.current)
+      TextEditorController.moveCursorToEndLine(ta.current)
     }
   }
 

@@ -8,7 +8,6 @@ import {IconButton} from './global/ui/Button'
 import {HStack, Label} from 'react-nocss'
 import {LayoutLayer} from './global/application/Application'
 import {observe, observer} from './lib/rx/RXObserver'
-import {MathJaxContext} from 'better-react-mathjax'
 
 export const API_URL = process.env.REACT_APP_API_URL
 export const IS_DEV_MODE = process.env.REACT_APP_MODE === 'development'
@@ -25,12 +24,7 @@ export const App = observer(() => {
   console.log('new App')
   observeThemeManager()
 
-  return <MathJaxContext config={{
-    tex: {
-      inlineMath: [['$', '$'], ['\\(', '\\)']]
-    }
-  }}>
-    <>
+  return <>
       <BrowserRouter>
         <Routes>
           <Route path="/*" element={<BlogPage/>}/>
@@ -39,7 +33,6 @@ export const App = observer(() => {
       </BrowserRouter>
       <ErrorMsgView/>
     </>
-  </MathJaxContext>
 })
 
 export const ErrorMsgView = observer(() => {

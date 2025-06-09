@@ -33,7 +33,7 @@ export const BlogMenuView = observer(() => {
     gap='8px'
     className='ltr'
     fontSize='0.9rem'
-    paddingLeft='40px'
+    paddingLeft='32px'
     paddingRight='20px'
     paddingBottom='20px'
     layer={LayoutLayer.MODAL}>

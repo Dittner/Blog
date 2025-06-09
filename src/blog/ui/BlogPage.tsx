@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { LayoutLayer } from '../../global/application/Application'
-import { HStack, Image, Label, Spacer, type StackProps, StylableContainer, VStack } from 'react-nocss'
+import { HStack, ImageCotnainer, Label, Spacer, type StackProps, StylableContainer, VStack } from 'react-nocss'
 import { NavBar } from '../../global/ui/NavBar'
 import { blogContext, useWindowSize } from '../../App'
 import { observeEditor, observeUser } from '../BlogContext'
@@ -151,86 +151,6 @@ To start the server, execute commands in the terminal:`
     </VStack>
   </VStack>
 }
-//
-// const CreateBookForm = observer(({author}: { author: Directory }) => {
-//   const theme = themeManager.theme
-//   const [isFormOpened, setIsFormOpened] = React.useState(false)
-//   const [getErr, setErr] = React.useState('')
-//   const navigate = useNavigate()
-//
-//   const openForm = () => {
-//     setIsFormOpened(true)
-//   }
-//
-//   const createBook = (id: string) => {
-//     if (!id) return
-//
-//     const bookId = id.toLowerCase()
-//     const duplicate = author.children.find(b => b.id === bookId)
-//     if (duplicate) {
-//       setErr('Duplicate was found')
-//     } else {
-//       const b = author.createFile(bookId)
-//       if (b) {
-//         navigate('/repo/' + author.id + '/' + b.id)
-//         setIsFormOpened(false)
-//         setErr('')
-//       } else {
-//         setErr('Storing has failed')
-//       }
-//     }
-//   }
-//
-//   return (
-//     <VStack
-//       width='300px'
-//       valign="top"
-//       halign="right"
-//       gap="4px"
-//       position='absolute'
-//       top='40px'
-//       right='10px'>
-//
-//       <Button
-//         title='New Book'
-//         fontSize='0.9rem'
-//         paddingBottom='1px'
-//         paddingHorizontal='10px'
-//         minHeight='25px'
-//         bgColor={undefined}
-//         textColor={theme.red}
-//         hoverState={(state: ButtonProps) => {
-//           state.btnCursor = true
-//           state.textColor = theme.isLight ? theme.red + 'cc' : theme.white
-//         }}
-//         onClick={openForm}/>
-//
-//       {isFormOpened &&
-//         <TextInputForm
-//           text=''
-//           title='Book ID:'
-//           autoFocus
-//           onApply={t => {
-//             createBook(t)
-//           }}
-//           onCancel={() => {
-//             setIsFormOpened(false)
-//           }}/>
-//       }
-//
-//       {getErr &&
-//         <Label
-//           fontSize='0.8rem'
-//           width='100%'
-//           textAlign='center'
-//           textColor={theme.orange}
-//           opacity='0.8'
-//           text={getErr}/>
-//       }
-//
-//     </VStack>
-//   )
-// })
 
 const FileView = observer(({ file }: { file: File }) => {
   console.log('new FileView')
@@ -315,6 +235,7 @@ const PageView = observer(({ page, index }: { page: Page, index: number }) => {
   observe(page)
   const isFileEditing = page.file?.isEditing ?? false
   const theme = themeManager.theme
+  const user = blogContext.user
 
   const toggleSelection = (e: any) => {
     e.stopPropagation()
@@ -330,12 +251,13 @@ const PageView = observer(({ page, index }: { page: Page, index: number }) => {
       width="100%"
       minHeight="30px"
       paddingLeft={isFileEditing && page.isSelected ? '74px' : '80px'}
+      paddingBottom='50px'
       borderLeft={isFileEditing && page.isSelected ? ['6px', 'solid', theme.red] : undefined}
       bgColor={isFileEditing && page.isSelected ? theme.selectedBlockBg : undefined}
       hoverState={state => {
         state.bgColor = isFileEditing && page.isSelected ? theme.selectedBlockBg : isFileEditing ? theme.hoveredBlockBg : undefined
       }}>
-      <MarkdownText width='100%' text={page.text} />
+      <MarkdownText width='100%' text={page.text} replaceEmTagWithCode={user.selectedFile && !user.selectedFile.info.isCode} />
     </StylableContainer>
   )
 })
@@ -441,14 +363,6 @@ const AuthorInfoView = ({ file }: { file: File }) => {
         src={blogContext.restApi.assetsUrl + file.info.photo} />
     }
 
-    {/* <MultilineLabel
-      textAlign='left'
-      className='article'
-      textColor={theme.text}
-      paddingVertical='20px'
-      fontSize='1.1rem'
-      text={info.about}/> */}
-
     <MarkdownText
       textAlign='left'
       className='article'
@@ -548,19 +462,12 @@ const ArticleInfoView = ({ file }: { file: File }) => {
       {parent?.info.author &&
         <Label
           className='article'
-          textColor={theme.text50}
+          textColor={theme.h1 + '50'}
           fontSize='1.2rem'
           whiteSpace='nowrap'
           paddingBottom='10px'
           text={info.year ? parent.info.author.shortName + ', ' + info.year : parent.info.author.shortName} />
       }
-
-      {/* <MultilineLabel
-        textAlign='left'
-        className='article'
-        textColor={theme.h1}
-        fontSize='1.2rem'
-        text={info.about}/> */}
 
       <MarkdownText
         textAlign='left'
@@ -573,7 +480,7 @@ const ArticleInfoView = ({ file }: { file: File }) => {
 
     </VStack>
     {file.info.cover &&
-      <Image
+      <ImageCotnainer
         containerWidth='100vw'
         overflow='hidden'
         width='100%'

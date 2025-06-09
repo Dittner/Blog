@@ -181,21 +181,8 @@ hr {
   margin: 0;
 }
 
-/*img {*/
-/*  image-rendering: pixelated;*/
-/*  image-rendering: -moz-crisp-edges;*/
-/*  image-rendering: crisp-edges;*/
-/*}*/
-
-/******************************/
-/*--------- LINK ---------*/
-/******************************/
-
-a:link, a:visited, a:active {
-  color: #27388C;
-}
-a:hover {
-  text-decoration: underline;
+img {
+  float: none;
 }
 
 /******************************/
@@ -214,6 +201,7 @@ a:hover {
 .listScrollbar {
   display: block;
   overflow: auto;
+  scrollbar-gutter: stable;
 }
 
 .listScrollbar::-webkit-scrollbar {

@@ -1,14 +1,14 @@
-import {type Page, type User} from '../../domain/BlogModel'
-import {type InputProtocol} from 'react-nocss'
-import {BlogContext} from '../../BlogContext'
-import {RXObservableEntity} from '../../../lib/rx/RXPublisher'
+import { type Page, type User } from '../../domain/BlogModel'
+import { type InputProtocol } from 'react-nocss'
+import { BlogContext } from '../../BlogContext'
+import { RXObservableEntity } from '../../../lib/rx/RXPublisher'
 
 export interface NumberProtocol {
   value: number
 }
 
 export class Editor extends RXObservableEntity<Editor> {
-  readonly inputTextBuffer: InputProtocol = {value: ''}
+  readonly inputTextBuffer: InputProtocol = { value: '' }
   private readonly user: User
 
   //--------------------------------------
@@ -31,8 +31,8 @@ export class Editor extends RXObservableEntity<Editor> {
   //--------------------------------------
   //  isTextReplacing
   //--------------------------------------
-  readonly replaceSubstringProtocol:InputProtocol = {value: ''}
-  readonly replaceWithProtocol:InputProtocol = {value: ''}
+  readonly replaceSubstringProtocol: InputProtocol = { value: '' }
+  readonly replaceWithProtocol: InputProtocol = { value: '' }
   private _isTextReplacing: boolean = false
   get isTextReplacing(): boolean { return this._isTextReplacing }
   set isTextReplacing(value: boolean) {
@@ -61,6 +61,7 @@ export class Editor extends RXObservableEntity<Editor> {
         !isEditing && this.applyTextChanges()
       })
       .subscribe()
+
     document.addEventListener('keydown', this.onKeyDown.bind(this))
   }
 
@@ -163,82 +164,75 @@ export class Editor extends RXObservableEntity<Editor> {
   }
 
   //--------------------------------------
-  //  removeDuplicateSpaces
-  //--------------------------------------
-  private _removeDuplicateSpaces: boolean = true
-  get removeDuplicateSpaces(): boolean { return this._removeDuplicateSpaces }
-  set removeDuplicateSpaces(value: boolean) {
-    if (this._removeDuplicateSpaces !== value) {
-      this._removeDuplicateSpaces = value
-      this.mutated()
-    }
-  }
-
-  //--------------------------------------
-  //  removeHyphenAndSpace
-  //--------------------------------------
-  private _removeHyphenAndSpace: boolean = true
-  get removeHyphenAndSpace(): boolean { return this._removeHyphenAndSpace }
-  set removeHyphenAndSpace(value: boolean) {
-    if (this._removeHyphenAndSpace !== value) {
-      this._removeHyphenAndSpace = value
-      this.mutated()
-    }
-  }
-
-  //--------------------------------------
-  //  replaceHyphenWithDash
-  //--------------------------------------
-  private _replaceHyphenWithDash: boolean = true
-  get replaceHyphenWithDash(): boolean { return this._replaceHyphenWithDash }
-  set replaceHyphenWithDash(value: boolean) {
-    if (this._replaceHyphenWithDash !== value) {
-      this._replaceHyphenWithDash = value
-      this.mutated()
-    }
-  }
-
-  //--------------------------------------
   //  maxEmptyLines
   //--------------------------------------
-  readonly maxEmptyLines: NumberProtocol = {value: 3}
+  readonly maxEmptyLines: NumberProtocol = { value: 3 }
 
   startFormatting(text: string): string {
-    let res = text
+    let res = ''
 
-    if (this.removeDuplicateSpaces) {
-      //remove new lines and spaces at the beginning of the text
-      res = res.replace(/^[\n| ]+/, '')
-      //remove new lines and spaces at the end of the text
-      res = res.replace(/[\n ]+$/, '')
-      //remove spaces at the beginning of line
-      res = res.replace(/\n +/g, '\n')
-      res = res.replace(/ +/g, ' ')
-      res = res.replace(/ +,/g, ',')
-    }
+    let blocks = text.replace(/^```code\s*\n(((?!```)(.|\n))+)\n```/gm, '<CODE>$1<CODE>').split('<CODE>')
 
-    if (this.replaceHyphenWithDash) {
-      //res = res.replace(/-- /g, '— ')
-      //res = res.replace(/ -- /g, ' — ')
-      res = res.replace(/([,.])- /g, '$1 — ')
-      res = res.replace(/ [-–] /g, ' — ')
-    }
+    blocks.forEach((b, i) => {
+      if (i % 2 !== 0) {
+        res += '```code\n' + this.replaceQuotes(b) + '\n```'
+      } else {
+        let blockText = b
+        if (i === 0) blockText = this.removeExtraSpacesAtTheBeginning(blockText)
+        else if (i === blocks.length - 1) blockText = this.removeExtraSpacesAtTheEnd(blockText)
+        blockText = this.removeExtraSpacesInTheMiddle(blockText)
+        blockText = this.replaceHyphenWithDash(blockText)
+        blockText = this.removeHyphenAndSpace(blockText)
+        blockText = this.replaceQuotes(blockText)
+        blockText = this.reduceEmptyLines(blockText)
+        res += blockText
+      }
+    })
 
-    if (this.removeHyphenAndSpace) {
-      res = res.replace(/^[-–] /gm, '— ')
-      res = res.replace(/ [-–]$/gm, '—')
-      res = res.replaceAll('\n- ', '\n— ')
-      //res = res.replaceAll('-\n', '—\n')
-      res = res.replace(/([А-я])- \n/g, '$1')
-    }
-
-    res = res.replace(/[”„“«»]/g, '"')
-    res = res.replace(/…/g, '...')
-
-    const max = this.maxEmptyLines.value
-    res = res.replace(new RegExp(`\n{${max},}`, 'g'), '\n'.repeat(max))
-
+    console.log('res:', res)
     return res
+  }
+
+  removeExtraSpacesAtTheBeginning(s: string): string {
+    return s.replace(/^[\n| ]+/, '')
+  }
+
+  removeExtraSpacesAtTheEnd(s: string): string {
+    return s.replace(/[\n ]+$/, '')
+  }
+
+  removeExtraSpacesInTheMiddle(s: string): string {
+    return s
+      .replace(/\n +/g, '\n')
+      .replace(/ +/g, ' ')
+      .replace(/ +,/g, ',')
+  }
+
+  replaceHyphenWithDash(s: string): string {
+    return s
+      .replace(/ -- /g, ' — ')
+      .replace(/\n-- /g, '\n— ')
+      .replace(/([,.])- /g, '$1 — ')
+      .replace(/ [-–] /g, ' — ')
+  }
+
+  removeHyphenAndSpace(s: string): string {
+    return s
+      .replace(/^[-–] /gm, '— ')
+      .replace(/[-–]$/gm, '—')
+      .replaceAll('\n- ', '\n— ')
+      .replace(/([А-я])- \n/g, '$1')
+  }
+
+  replaceQuotes(s: string): string {
+    return s
+      .replace(/[”„“«»]/g, '"')
+      .replace(/…/g, '...')
+  }
+
+  reduceEmptyLines(s: string): string {
+    const max = this.maxEmptyLines.value
+    return s.replace(new RegExp(`\n{${max},}`, 'g'), '\n'.repeat(max))
   }
 
   replaceWith(substr: string, replaceValue: string) {
