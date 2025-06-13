@@ -1,5 +1,5 @@
 import {generateUID} from '../domain/UIDGenerator'
-import {RXObservableEntity} from '../../lib/rx/RXPublisher'
+import {RXObservableEntity} from 'flinker'
 
 export enum LayoutLayer {
   MINUS = '-1',

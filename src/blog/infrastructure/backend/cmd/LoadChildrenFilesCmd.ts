@@ -1,6 +1,6 @@
 import {type RestApi, type RestApiError, type Runnable} from '../RestApi'
 import {type File} from '../../../domain/BlogModel'
-import {type RXObservable, RXOperation} from '../../../../lib/rx/RXPublisher'
+import {type RXObservable, RXOperation} from 'flinker'
 
 export class LoadChildrenFilesCmd implements Runnable {
   private readonly api: RestApi

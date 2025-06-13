@@ -1,7 +1,7 @@
 import {generateUID, type UID} from '../../global/domain/UIDGenerator'
 import {type File} from '../domain/BlogModel'
 import {type RestApi} from './backend/RestApi'
-import {RXObservableEntity} from '../../lib/rx/RXPublisher'
+import {RXObservableEntity} from 'flinker'
 import {GlobalContext} from '../../global/GlobalContext'
 
 export class StoreService extends RXObservableEntity<StoreService> {

@@ -1,6 +1,6 @@
 import {Application} from './application/Application'
 import {generateUID} from './domain/UIDGenerator'
-import {observe} from '../lib/rx/RXObserver'
+import {observe} from 'flinker-react'
 
 export class GlobalContext {
   readonly uid = generateUID()

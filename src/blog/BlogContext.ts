@@ -4,7 +4,7 @@ import {Editor} from './ui/editor/Editor'
 import {StoreService} from './infrastructure/StoreService'
 import {RestApi} from './infrastructure/backend/RestApi'
 import {GlobalContext} from '../global/GlobalContext'
-import {observe} from '../lib/rx/RXObserver'
+import {observe} from 'flinker-react'
 
 export class BlogContext {
   readonly user: User

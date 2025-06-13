@@ -7,7 +7,7 @@ import {BlogPage} from './blog/ui/BlogPage'
 import {IconButton} from './global/ui/Button'
 import {HStack, Label} from 'react-nocss'
 import {LayoutLayer} from './global/application/Application'
-import {observe, observer} from './lib/rx/RXObserver'
+import {observe, observer} from 'flinker-react'
 
 export const API_URL = process.env.REACT_APP_API_URL
 export const IS_DEV_MODE = process.env.REACT_APP_MODE === 'development'

@@ -4,6 +4,10 @@ import { GlobalTheme, themeManager } from '../application/ThemeManager'
 import { Grammar, Lexema, MDToken } from './Grammar'
 
 const rules: any[] = [
+  //character escaping
+  [/\\`/gm, '&#x60'],
+  [/\\#/gm, '&#x23'],
+
   //blockquote
   [/^> +(.*)\n?/gm, '<blockquote><p>$1</p></blockquote>'],
 
@@ -39,12 +43,13 @@ const rules: any[] = [
 
 
   //headers
-  [/^\$?#{6}\s?(.+)\n?/gm, '<h6>$1</h6>'],
-  [/^\$?#{5}\s?(.+)\n?/gm, '<h5>$1</h5>'],
-  [/^\$?#{4}\s?(.+)\n?/gm, '<h4>$1</h4>'],
-  [/^\$?#{3}\s?(.+)\n?/gm, '<h3>$1</h3>'],
-  [/^\$?#{2}\s?(.+)\n?/gm, '<h2>$1</h2>'],
-  [/^\$?#\s?(.+)\n?/gm, '<h1>$1</h1>'],
+  [/\$?#{6} +(.+)\n?/gm, '<h6>$1</h6>'],
+  [/\$?#{5} +(.+)\n?/gm, '<h5>$1</h5>'],
+  [/\$?#{4} +(.+)\n?/gm, '<h4>$1</h4>'],
+  [/\$?#{3} +(.+)\n?/gm, '<h3>$1</h3>'],
+  [/\$?#{2} +(.+)\n?/gm, '<h2>$1</h2>'],
+  [/\$?#{1} +(.+)\n?/gm, '<h1>$1</h1>'],
+
 
   //bold
   [/_{2,}([^_\n]+)_{2,}/g, '<b>$1</b>'],
@@ -59,7 +64,7 @@ const rules: any[] = [
 
   //br
   [/\n{3,}/g, '\n\n'],
-  [/\n/g, '<br/>']
+  [/\n/g, '<br/>'],
 ]
 
 interface MarkdownTextProps extends LabelProps {
@@ -115,12 +120,12 @@ const htmlize = (root: MDToken): string => {
   let res = ''
   let t: MDToken | undefined = root
   while (t) {
-    const text = t.value.replace(/</g, '&lt;')
+    const text = t.value
     if (text.length === 0) return ''
     switch (t.lex) {
       case Lexema.LineBreak: res += text; break
       case Lexema.Number: res += '<span class="num">' + text + '</span>'; break
-      case Lexema.Operator: res += '<span class="op">' + text + '</span>'; break
+      case Lexema.Operator: res += '<span class="op">' + text.replace(/</g, '&lt;') + '</span>'; break
       case Lexema.String: res += '<span class="str">' + text + '</span>'; break
       case Lexema.Comment: res += '<span class="cmt">' + text + '</span>'; break
       case Lexema.Regex: res += '<span class="rx">' + text + '</span>'; break

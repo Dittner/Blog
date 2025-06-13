@@ -1,4 +1,4 @@
-const operators: Set<string> = new Set(('-–—+*=~$@^%&?!#|/()[]{}<>:;,.,"`' + "'\\").split(''))
+const operators: Set<string> = new Set(('-–—+*=~$@^%&?!#|/()[]{}<>:;,."`' + "'\\").split(''))
 const numbers: Set<string> = new Set('0123456789'.split(''))
 
 export enum Lexema {
@@ -43,8 +43,8 @@ export class MDToken {
 export class Grammar {
   //Scheme of interval rules
   readonly ir = [
-    'M(""")(""")',
-    "M(''')(''')",
+    'S(""")(""")',
+    "S(''')(''')",
     'M(/*)(*/)',
     'M(#)(\n)',
     'M(//)(\n)',
@@ -55,7 +55,7 @@ export class Grammar {
 
   readonly gr = [
     //Replace Letters(L) token with Keywords(K)
-    'L(^(extends|default|implements|catch|switch|static|override|internal|void|null|protected|abstract|export|undefined|public|private|var|self|this|final|double|throws|throw|new|instanceof|False|false|None|int|str|float|True|true|and|as|assert|case|match|async|await|break|interface|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield)$:K)',
+    'L(^(extends|default|implements|catch|switch|static|override|internal|void|null|protected|abstract|export|undefined|public|private|var|self|this|dict|list|final|double|throws|throw|new|instanceof|False|false|None|bool|int|str|float|True|true|and|as|assert|case|match|async|await|break|interface|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield)$:K)',
     //Replace Letters(L) token with Decorators(D)
     'O(^@$:D) L(:D)',
     //Identifiers(L) can have numbers(N)
@@ -73,7 +73,7 @@ export class Grammar {
     //Supports hex numbers
     'N(^0$:) L(^x:N)',
     //Supports strings formating
-    'L(^f|b$:S) S(:)',
+    'L(^[fbr]$:S) S(:)',
   ]
 
   readonly intervalRules: IntervalRule[]
@@ -81,11 +81,9 @@ export class Grammar {
   constructor() {
     this.intervalRules = this.ir.map(s => new IntervalRule(s))
     this.grammarRules = this.gr.map(s => new GrammarRule(s))
-    //console.log('Rules:', this.grammarRules)
   }
 
   tokenize(code: string): MDToken {
-    //console.log('!!! tokenize:', code.substring(0, 10) + '...')
     let root: MDToken | undefined
     let t: MDToken | undefined
     let tail: MDToken | undefined

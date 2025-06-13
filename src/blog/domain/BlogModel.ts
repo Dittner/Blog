@@ -1,9 +1,9 @@
 import {generateUID, type UID} from '../../global/domain/UIDGenerator'
 import {BlogContext} from '../BlogContext'
 import {type RestApi, type RestApiError} from '../infrastructure/backend/RestApi'
-import {type RXObservable, RXObservableEntity} from '../../lib/rx/RXPublisher'
 import {sortByKeys} from '../../global/ui/Utils'
 import {GlobalContext} from '../../global/GlobalContext'
+import { RXObservable, RXObservableEntity } from 'flinker'
 
 interface Serializable {
   serialize: () => string
@@ -214,10 +214,11 @@ export class File extends RXObservableEntity<File> {
   private op: RXObservable<any[], RestApiError> | undefined
   loadChildrenFiles(): RXObservable<any[], RestApiError> {
     if (this.op && !this.op.isComplete) return this.op
-    this.op = BlogContext.self.restApi.loadChildrenFiles(this)
+    const op = BlogContext.self.restApi.loadChildrenFiles(this)
+    this.op = op
     this.isLoading = true
 
-    this.op.pipe()
+    op.pipe()
       .onReceive((files: any) => {
         console.log('File:loadChildrenFiles:onReceive, files count:', files.length)
 
@@ -235,7 +236,7 @@ export class File extends RXObservableEntity<File> {
       })
       .subscribe()
 
-    return this.op
+    return op
   }
 
   createAndAddFile(): File | undefined {
@@ -254,7 +255,7 @@ export class File extends RXObservableEntity<File> {
     this.addFile(res)
     const rx = BlogContext.self.restApi.storeFile(res)
     rx.pipe()
-      .onError(e => {
+      .onError((e:any) => {
         this.removeFile(res)
         GlobalContext.self.app.errorMsg = e.message
       })
@@ -280,7 +281,7 @@ export class File extends RXObservableEntity<File> {
     this.addFile(res)
     const rx = BlogContext.self.restApi.storeFile(res)
     rx.pipe()
-      .onError(e => {
+      .onError((e:any) => {
         this.removeFile(res)
         GlobalContext.self.app.errorMsg = e.message
       })

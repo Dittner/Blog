@@ -105,8 +105,8 @@ html {
   line-height: var(--LineHeight);
   justify-content: space-between;
   font-family: var(--font-family) !important;
-  /*-webkit-font-smoothing: antialiased !important;*/
-  /*-moz-osx-font-smoothing: antialiased !important;*/
+  /* -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: antialiased !important; */
 }
 
 @media screen and (max-width: 1000px) {

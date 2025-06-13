@@ -2,7 +2,7 @@ import {PingCmd} from './cmd/PingCmd'
 import {type File} from '../../domain/BlogModel'
 import {StoreFileCmd} from './cmd/StoreFileCmd'
 import {LoadChildrenFilesCmd} from './cmd/LoadChildrenFilesCmd'
-import {type AnyRXObservable, type RXObservable, RXObservableEntity} from '../../../lib/rx/RXPublisher'
+import {type AnyRXObservable, type RXObservable, RXObservableEntity} from 'flinker'
 import {globalContext} from '../../../App'
 import {RemoveFileCmd} from './cmd/RemoveFileCmd'
 

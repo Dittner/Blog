@@ -5,7 +5,7 @@ import {IconButton, TextButton, ToggleButton} from './Button'
 import {themeManager} from '../application/ThemeManager'
 import {observeApi, observeBlogMenu, observeEditor, observeStoreService, observeUser} from '../../blog/BlogContext'
 import {type File} from '../../blog/domain/BlogModel'
-import {observer} from '../../lib/rx/RXObserver'
+import {observer} from 'flinker-react'
 import type {JSX} from 'react/jsx-runtime'
 
 export const NavBar = observer(() => {

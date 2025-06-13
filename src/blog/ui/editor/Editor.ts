@@ -1,7 +1,7 @@
 import { type Page, type User } from '../../domain/BlogModel'
 import { type InputProtocol } from 'react-nocss'
 import { BlogContext } from '../../BlogContext'
-import { RXObservableEntity } from '../../../lib/rx/RXPublisher'
+import { RXObservableEntity } from 'flinker'
 
 export interface NumberProtocol {
   value: number

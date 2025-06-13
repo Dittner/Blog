@@ -1,7 +1,7 @@
 import { generateUID } from '../domain/UIDGenerator'
 import { buildRule, type StylableComponentProps } from 'react-nocss'
-import { RXObservableEntity } from '../../lib/rx/RXPublisher'
-import { observe } from '../../lib/rx/RXObserver'
+import { RXObservableEntity } from 'flinker'
+import { observe } from 'flinker-react'
 
 export interface GlobalTheme {
   id: string
@@ -124,7 +124,7 @@ export class ThemeManager extends RXObservableEntity<ThemeManager> {
 
   createLightTheme(): GlobalTheme {
     const black = '#222222'
-    const white = '#efefea'//efeee8
+    const white = '#f5f5f0'//efeee8
     const red = '#93324f'
     const header = '#755b54'
     return {
@@ -149,7 +149,7 @@ export class ThemeManager extends RXObservableEntity<ThemeManager> {
       h5: header,
       h6: black + '88',
       code: black,
-      codeBg: '#b1a49720',
+      codeBg: '#00000005',
       em: '#dfeae0',
       blue: '#0a4277',
       link: '#0a4277',
@@ -228,7 +228,7 @@ export class ThemeManager extends RXObservableEntity<ThemeManager> {
     const text = '#76787f' //aab6c2
     const white = '#c6d4e3'
     const red = '#df5f83'
-    const header = '#aaa5a5'
+    const header = '#aaa2a2'
     return Object.assign({}, t, {
       id: 'night',
       isLight: false,
@@ -246,10 +246,11 @@ export class ThemeManager extends RXObservableEntity<ThemeManager> {
       h4: header,
       h5: header,
       h6: text + '88',
-      em: '#aaaaaa',
-      code: '#aaaaaa',
+      em: '#a7aab3',
+      code: '#a7aab3',
       codeBg: header + '15',
       border: '#ffFFff10',
+      blue: '#6b9fc0',
       violet: '#aeadde',
       purple: '#b2aee5',
       comment: '#7ea3a5',

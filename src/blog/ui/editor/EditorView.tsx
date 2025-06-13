@@ -1,4 +1,4 @@
-import { observer } from '../../../lib/rx/RXObserver'
+import { observer } from 'flinker-react'
 import { buildClassName, HStack, Label, Spacer, VStack, type StackProps, type StylableComponentProps, type TextAreaProps } from 'react-nocss'
 import { observeEditor } from '../../BlogContext'
 import { type GlobalTheme, themeManager } from '../../../global/application/ThemeManager'
@@ -74,10 +74,10 @@ class TextEditorController {
 
     const row = value.slice(beginRowIndex, selectionStart)
     const beginRowSpaces = TextEditorController.calcSpaceBefore(row)
-    const endRowSpaces = /(:|\(|\{) *$/.test(row) ? 4 : 0
+
     //console.log('Row:' + 'BEGIN' + row + 'END, beginRowSpaces:', beginRowSpaces)
 
-    const spaces = '\n' + ' '.repeat(beginRowSpaces + endRowSpaces)
+    const spaces = '\n' + ' '.repeat(beginRowSpaces)
     // func setRangeText unfortunately clears browser history
     // ta.current.setRangeText(spaces, selectionStart, selectionStart, 'end')
     document.execCommand('insertText', false, spaces)
